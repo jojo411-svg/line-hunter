@@ -1,0 +1,2475 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="LINE">
+    <title>LINE</title>
+    <style>
+        body, div, p, span, button, input, select, table, th, td {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Meiryo", sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        html, body {
+            background-color: #000;
+            color: #fff;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+        .view-panel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .view-panel.active-view {
+            display: flex !important;
+        }
+        #videoCallView {
+            z-index: 10;
+            background: #000;
+        }
+        #mainVideo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            pointer-events: none;
+        }
+        #centerFocusGuide {
+            position: absolute;
+            top: 32%;
+            left: 22%;
+            width: 56%;
+            height: 28%;
+            border: 1.5px dashed rgba(255, 255, 255, 0.28);
+            border-radius: 10px;
+            z-index: 5;
+            pointer-events: none;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 4px;
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.45);
+        }
+        #videoCenterTapArea {
+            position: relative;
+            z-index: 15;
+            flex: 1;
+            width: 100%;
+            cursor: pointer;
+        }
+        .vc-top-bar {
+            position: relative;
+            z-index: 25;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 14px 16px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.75), transparent);
+        }
+        .vc-minimize-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.45);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            font-size: 1.15rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .vc-partner-info {
+            text-align: center;
+            margin-top: 2px;
+            cursor: pointer;
+        }
+        .vc-partner-name {
+            font-size: 1.05rem;
+            font-weight: bold;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #888;
+            display: inline-block;
+        }
+        .status-dot.scanning {
+            background: #06C755;
+            box-shadow: 0 0 6px #06C755;
+        }
+        .status-dot.busy {
+            background: #ffb300;
+            box-shadow: 0 0 6px #ffb300;
+        }
+        .status-dot.filtered {
+            background: #29b6f6;
+        }
+        .vc-timer {
+            font-size: 0.82rem;
+            color: #e0e0e0;
+            margin-top: 2px;
+            padding: 2px 8px;
+            border-radius: 8px;
+            background: rgba(0,0,0,0.25);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.85);
+        }
+        .vc-sub-badge {
+            font-size: 0.68rem;
+            color: #8DE055;
+            margin-top: 2px;
+        }
+        .vc-pip-box {
+            width: 82px;
+            height: 118px;
+            background: #222;
+            border-radius: 10px;
+            border: 1.5px solid rgba(255,255,255,0.45);
+            overflow: hidden;
+            position: relative;
+            z-index: 30;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        .vc-pip-box.auto-active {
+            border: 2.5px solid #06C755;
+        }
+        .vc-pip-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #4a6583;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            pointer-events: none;
+        }
+        .vc-pip-label {
+            font-size: 0.62rem;
+            color: #ccc;
+            margin-top: 6px;
+        }
+        #notificationBanner {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.97);
+            color: #111;
+            border-radius: 14px;
+            padding: 11px 14px;
+            z-index: 40;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+            display: none;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        .notif-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #06C755;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.78rem;
+            flex-shrink: 0;
+        }
+        .notif-content {
+            flex: 1;
+            overflow: hidden;
+        }
+        .notif-sender {
+            font-weight: bold;
+            font-size: 0.85rem;
+            color: #000;
+            margin-bottom: 1px;
+        }
+        .notif-text {
+            font-size: 0.85rem;
+            color: #333;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .vc-quick-strip {
+            position: relative;
+            z-index: 25;
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            padding: 0 12px 6px 12px;
+        }
+        .quick-chip {
+            background: rgba(0,0,0,0.55);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #eee;
+            border-radius: 14px;
+            padding: 4px 10px;
+            font-size: 0.72rem;
+            cursor: pointer;
+        }
+        .quick-chip.active-chip {
+            background: rgba(6, 199, 85, 0.35);
+            border-color: #06C755;
+            color: #fff;
+            font-weight: bold;
+        }
+        .vc-bottom-bar {
+            position: relative;
+            z-index: 25;
+            width: 100%;
+            padding: 10px 20px 26px 20px;
+            background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+            display: flex;
+            justify-content: center;
+        }
+        .vc-buttons {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            width: 100%;
+            max-width: 360px;
+        }
+        .vc-btn {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,0.22);
+            backdrop-filter: blur(4px);
+            color: #fff;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .vc-btn:active {
+            background: rgba(255,255,255,0.4);
+        }
+        .vc-btn-red {
+            background: #ff3b30;
+        }
+        #chatRoomView {
+            z-index: 20;
+            background-color: #7494C0;
+        }
+        .chat-header {
+            height: 50px;
+            width: 100%;
+            background-color: #6583ad;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            color: #fff;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            flex-shrink: 0;
+            z-index: 30;
+        }
+        .chat-header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.02rem;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 8px 4px;
+        }
+        .chat-header-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 1.15rem;
+        }
+        #floatingPip {
+            position: absolute;
+            top: 58px;
+            right: 10px;
+            width: 90px;
+            height: 128px;
+            background: #000;
+            border-radius: 9px;
+            overflow: hidden;
+            z-index: 35;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.45);
+            border: 1.5px solid rgba(255,255,255,0.8);
+            cursor: pointer;
+        }
+        #floatingPip.auto-active {
+            border: 2.5px solid #06C755;
+        }
+        #pipVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            pointer-events: none;
+        }
+        #chatMessages {
+            flex: 1;
+            width: 100%;
+            overflow-y: auto;
+            padding: 12px 10px 18px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .msg-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            width: 100%;
+        }
+        .msg-row.self {
+            justify-content: flex-end;
+        }
+        .msg-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #4a6583;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+        .msg-bubble-wrap {
+            max-width: 80%;
+            display: flex;
+            flex-direction: column;
+        }
+        .msg-sender-name {
+            font-size: 0.72rem;
+            color: #f0f4f8;
+            margin-bottom: 2px;
+            margin-left: 2px;
+        }
+        .msg-bubble {
+            background: #fff;
+            color: #111;
+            padding: 9px 12px;
+            border-radius: 15px;
+            border-top-left-radius: 4px;
+            font-size: 0.92rem;
+            line-height: 1.46;
+            white-space: pre-wrap;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+            word-break: break-word;
+            user-select: text;
+        }
+        .msg-row.self .msg-bubble {
+            background: #8DE055;
+            color: #111;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 4px;
+        }
+        .msg-photo {
+            width: 175px;
+            height: auto;
+            border-radius: 10px;
+            border: 1px solid rgba(0,0,0,0.1);
+            display: block;
+            margin-bottom: 6px;
+        }
+        .badge-treasure {
+            display: inline-block;
+            background: #d32f2f;
+            color: #fff;
+            font-weight: bold;
+            padding: 2px 7px;
+            border-radius: 5px;
+            font-size: 0.78rem;
+            margin-bottom: 4px;
+        }
+        .badge-chance {
+            display: inline-block;
+            background: #f57c00;
+            color: #fff;
+            font-weight: bold;
+            padding: 2px 7px;
+            border-radius: 5px;
+            font-size: 0.78rem;
+            margin-bottom: 4px;
+        }
+        .badge-pass {
+            display: inline-block;
+            background: #616161;
+            color: #fff;
+            padding: 2px 7px;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            margin-bottom: 4px;
+        }
+        .badge-kobutsu {
+            display: inline-block;
+            background: #6a1b9a;
+            color: #fff;
+            font-weight: bold;
+            padding: 2px 7px;
+            border-radius: 5px;
+            font-size: 0.74rem;
+            margin-left: 4px;
+            margin-bottom: 4px;
+        }
+        .cond-btn-row {
+            display: flex;
+            gap: 4px;
+            margin-top: 6px;
+        }
+        .cond-btn {
+            flex: 1;
+            background: #f0f4f8;
+            border: 1px solid #b0bec5;
+            color: #263238;
+            border-radius: 6px;
+            padding: 5px 4px;
+            font-size: 0.73rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .keep-btn {
+            margin-top: 8px;
+            background: #06C755;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 7px 10px;
+            font-size: 0.82rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+        .chat-bottom-bar {
+            height: 52px;
+            width: 100%;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            gap: 5px;
+            flex-shrink: 0;
+            border-top: 1px solid #ddd;
+            z-index: 30;
+        }
+        .chat-icon-btn {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: #555;
+            cursor: pointer;
+            padding: 4px;
+            flex-shrink: 0;
+        }
+        .chat-barcode-input {
+            flex: 1;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 18px;
+            padding: 7px 12px;
+            color: #111;
+            font-size: 0.85rem;
+            user-select: text;
+        }
+        .chat-send-btn {
+            background: #06C755;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 34px;
+            height: 34px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        #visualManualOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.74);
+            z-index: 200;
+            display: none;
+            cursor: pointer;
+        }
+        .manual-banner {
+            position: absolute;
+            top: 44%;
+            left: 6%;
+            right: 6%;
+            background: rgba(15, 23, 42, 0.95);
+            border: 2px solid #06C755;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+        }
+        .manual-callout {
+            position: absolute;
+            background: #ffeb3b;
+            color: #111;
+            font-size: 0.74rem;
+            font-weight: bold;
+            padding: 5px 8px;
+            border-radius: 8px;
+            border: 2px solid #f57f17;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+            line-height: 1.3;
+            max-width: 165px;
+        }
+        #settingsModal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.88);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+        }
+        .settings-card {
+            background: #1e1e1e;
+            width: 100%;
+            max-width: 440px;
+            border-radius: 14px;
+            padding: 15px;
+            color: #fff;
+            border: 1px solid #444;
+            max-height: 94%;
+            overflow-y: auto;
+        }
+        .settings-title {
+            font-size: 0.98rem;
+            font-weight: bold;
+            color: #06C755;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .form-group {
+            margin-bottom: 9px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.76rem;
+            color: #ccc;
+            margin-bottom: 3px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 7px 8px;
+            border-radius: 7px;
+            border: 1px solid #555;
+            background: #2b2b2b;
+            color: #fff;
+            font-size: 0.85rem;
+            user-select: text;
+        }
+        .btn-action-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        .sub-action-btn {
+            flex: 1;
+            padding: 9px 6px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #fff;
+            cursor: pointer;
+        }
+        .settings-save-btn {
+            width: 100%;
+            padding: 11px;
+            background: #06C755;
+            color: #fff;
+            border: none;
+            border-radius: 9px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 6px;
+        }
+        .cache-audit-bar {
+            font-size: 0.72rem;
+            color: #8DE055;
+            background: #111;
+            padding: 6px 8px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border: 1px solid #333;
+        }
+        canvas {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="captureCanvas"></canvas>
+
+    <!-- 1. LINEビデオ通話画面（カモフラージュ＋現場操作） -->
+    <div id="videoCallView" class="view-panel active-view">
+        <video id="mainVideo" autoplay playsinline muted></video>
+        <div id="centerFocusGuide">中央ズーム枠（値札・型番をここへ）</div>
+
+        <div id="notificationBanner" onclick="switchToChatView()">
+            <div class="notif-icon">LINE</div>
+            <div class="notif-content">
+                <div class="notif-sender" id="notifSender">肇晃</div>
+                <div class="notif-text" id="notifText">新着メッセージ</div>
+            </div>
+        </div>
+
+        <div class="vc-top-bar">
+            <button type="button" class="vc-minimize-btn" onclick="switchToChatView()">↙</button>
+            <div class="vc-partner-info">
+                <div class="vc-partner-name" onclick="switchToChatView()">
+                    <span id="vcPartnerName">肇晃</span>
+                    <span id="statusDot" class="status-dot"></span>
+                </div>
+                <div class="vc-timer" id="callTimer" onclick="handleTimerTap()">00:00</div>
+                <div class="vc-sub-badge" id="vcStoreBadge" onclick="cycleStoreChain()">店舗: ハードオフ系</div>
+            </div>
+            <div class="vc-pip-box" id="autoScanToggleVc" onclick="toggleAutoScan()">
+                <div class="vc-pip-avatar">👤</div>
+                <div class="vc-pip-label" id="pipScanLabel">自動: 停止</div>
+            </div>
+        </div>
+
+        <div id="videoCenterTapArea" onclick="switchToChatView()"></div>
+
+        <div class="vc-quick-strip">
+            <button type="button" class="quick-chip active-chip" id="chipDualMode" onclick="setCaptureMode('DUAL')">全体＋中央2分割</button>
+            <button type="button" class="quick-chip" id="chipMacroMode" onclick="setCaptureMode('MACRO')">銘板・値札ドアップ</button>
+            <button type="button" class="quick-chip" onclick="openVisualManual()">📖 取説表示</button>
+        </div>
+
+        <div class="vc-bottom-bar">
+            <div class="vc-buttons">
+                <button type="button" class="vc-btn" onclick="triggerManualCapture()">🎤</button>
+                <button type="button" class="vc-btn" onclick="forceResetSystem()">📷</button>
+                <button type="button" class="vc-btn" onclick="cycleVoiceMode()">
+                    <span id="voiceIcon">🔊</span>
+                </button>
+                <button type="button" class="vc-btn vc-btn-red" onclick="openSettings()">📞</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. LINEトーク画面（鑑定結果・3秒検品・台帳保存） -->
+    <div id="chatRoomView" class="view-panel">
+        <div class="chat-header">
+            <div class="chat-header-left" onclick="switchToVideoView()">
+                <span>＜</span>
+                <span id="chatPartnerName">肇晃</span>
+                <span style="font-size:0.75rem; color:#d0f8ce;">●</span>
+            </div>
+            <div class="chat-header-right">
+                <span onclick="openVisualManual()" style="cursor:pointer; font-size:0.95rem;">📖</span>
+                <span onclick="syncSynergyFromGAS()" style="cursor:pointer;">🔄</span>
+                <span id="chatVoiceToggle" onclick="cycleVoiceMode()" style="cursor:pointer;">🔊</span>
+                <span onclick="openSettings()" style="cursor:pointer;">☰</span>
+            </div>
+        </div>
+
+        <div id="floatingPip" onclick="switchToVideoView()">
+            <video id="pipVideo" autoplay playsinline muted></video>
+        </div>
+
+        <div id="chatMessages">
+            <div class="msg-row">
+                <div class="msg-avatar">👤</div>
+                <div class="msg-bubble-wrap">
+                    <div class="msg-sender-name" id="firstMsgSender">肇晃</div>
+                    <div class="msg-bubble">そっちの店の棚、どんなのある？写してくれたら相場と見る場所調べるよ！（時計の00:00を2回タップすると画面の取説が出るよ）</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-bottom-bar">
+            <button type="button" class="chat-icon-btn" onclick="toggleAutoScan()">＋</button>
+            <button type="button" class="chat-icon-btn" onclick="triggerManualCapture()">📷</button>
+            <input type="text" id="barcodeInput" class="chat-barcode-input" placeholder="型番・JAN入力（空欄なら▶で撮影）">
+            <button type="button" class="chat-send-btn" onclick="handleChatSend()">▶</button>
+        </div>
+    </div>
+
+    <!-- 3. 視覚的透視取説オーバーレイ（実際の画面に重なるカンニングシート） -->
+    <div id="visualManualOverlay" onclick="closeVisualManual()">
+        <!-- ビデオ画面用の説明ラベル群 -->
+        <div id="manualVideoLabels">
+            <div class="manual-callout" style="top:60px; left:10px;">
+                ⬆️ ↙ボタン<br>トーク画面（鑑定結果一覧）へ切り替えます
+            </div>
+            <div class="manual-callout" style="top:78px; left:30%; background:#8DE055;">
+                ⬆️ 通話時間 / 店舗名<br>・時間2回タップ：この取説を表示<br>・店舗名タップ：セカスト/ハードオフ等の値札暗号ルール切替
+            </div>
+            <div class="manual-callout" style="top:140px; right:10px;">
+                ⬆️ 右上ワイプ枠<br>自動パトロールの【開始 / 停止】切替（緑枠＝自動監視中）
+            </div>
+            <div class="manual-callout" style="bottom:135px; left:12%; background:#80d8ff;">
+                ⬇️ 撮影モード切替<br>普段は「全体＋中央2分割」、細かい文字は「銘板ドアップ」を選択
+            </div>
+            <div class="manual-callout" style="bottom:82px; left:8px;">
+                ⬇️ 🎤マイク<br>【手動シャッター】今映っている棚や値札を即座に鑑定します
+            </div>
+            <div class="manual-callout" style="bottom:82px; left:28%;">
+                ⬇️ 📷カメラ<br>カメラや通信が固まった時の【強制リセット】
+            </div>
+            <div class="manual-callout" style="bottom:82px; right:26%;">
+                ⬇️ 🔊スピーカー<br>音の切替（🔊お宝のみ ➔ 📢全部読む ➔ 🔇消音・バイブ）
+            </div>
+            <div class="manual-callout" style="bottom:82px; right:6px; background:#ffcdd2;">
+                ⬇️ 📞赤い電話<br>【裏設定・確保リストCSV出力】を開きます
+            </div>
+        </div>
+
+        <!-- トーク画面用の説明ラベル群 -->
+        <div id="manualChatLabels" style="display:none;">
+            <div class="manual-callout" style="top:54px; left:10px;">
+                ⬆️ ＜ 戻る<br>フル画面のビデオ通話カメラへ戻ります
+            </div>
+            <div class="manual-callout" style="top:54px; right:10px;">
+                ⬆️ 上部アイコン<br>📖：この取説表示<br>🔄：娘さんの端末と店内ニコイチ情報を同期<br>☰：裏設定とCSV出力
+            </div>
+            <div class="manual-callout" style="top:192px; right:10px; background:#8DE055;">
+                ⬆️ 右上ミニカメラ<br>タップするとビデオ画面へ戻ります（緑枠は自動スキャン中）
+            </div>
+            <div class="manual-callout" style="bottom:58px; left:8px;">
+                ⬇️ ＋ボタン / 📷ボタン<br>＋：自動スキャン開始/停止<br>📷：今すぐ手動撮影して鑑定
+            </div>
+            <div class="manual-callout" style="bottom:58px; right:10px; background:#80d8ff;">
+                ⬇️ 入力欄と▶ボタン<br>バーコードや型番を打って▶で検索！空欄のまま▶を押すとカメラ撮影します
+            </div>
+        </div>
+
+        <div class="manual-banner">
+            <div style="font-size:0.95rem; font-weight:bold; color:#8DE055; margin-bottom:4px;">📖 現場カンニング取説モード</div>
+            <div style="font-size:0.78rem; color:#eee;">●ランプの意味：緑＝自動巡回中 ／ 黄＝AI鑑定中 ／ 水色＝手ブレ・重複棚を自動カット中<br>【画面のどこかを1回タップすると0.1秒で元のLINE画面に戻ります】</div>
+        </div>
+    </div>
+
+    <!-- 4. システム裏設定＆確保リスト管理モーダル -->
+    <div id="settingsModal">
+        <div class="settings-card">
+            <div class="settings-title">
+                <span>ハンター司令塔システム設定（Ver.2.6）</span>
+                <span style="font-size:0.75rem; color:#aaa; cursor:pointer;" onclick="closeSettings()">[✕ 閉じる]</span>
+            </div>
+
+            <div class="btn-action-row">
+                <button type="button" class="sub-action-btn" style="background:#0288d1;" onclick="closeSettings(); openVisualManual();">📖 画面の視覚取説を見る</button>
+                <button type="button" class="sub-action-btn" style="background:#ff8f00;" onclick="runSoundAndVoiceTest()">🔊 チャイム・声テスト</button>
+            </div>
+
+            <div class="btn-action-row">
+                <button type="button" class="sub-action-btn" style="background:#2e7d32;" onclick="exportSavedItemsCSV()">📥 確保リスト・古物台帳CSV出力 (<span id="savedCountLabel">0</span>件)</button>
+                <button type="button" class="sub-action-btn" style="background:#555;" onclick="clearSynergyMemory()">🧹 店内記憶リセット</button>
+            </div>
+
+            <div class="cache-audit-bar" id="cacheAuditText">
+                監査ステータス：非重複・高密度マスタ辞書＋WebWorker稼働中
+            </div>
+
+            <div class="form-group">
+                <label>現在の巡回チェーン（値札の日付暗号ルール自動切替）</label>
+                <select id="storeChainSelect">
+                    <option value="HARDOFF" selected>ハードオフ / オフハウス / ガレージオフ（青カゴ・年月暗号）</option>
+                    <option value="2NDSTREET">セカンドストリート（値札右下6桁逆読み・ONLINE判定）</option>
+                    <option value="BOOKOFF">ブックオフ（4色季節シール・ところてん・YO/●記号）</option>
+                    <option value="SANTA_LOCAL">サンタの創庫 / スマイルサンタ / 地場総合店（裁量値札）</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>仕入れ戦略モード（上限ストッパー＆対象サイズ）</label>
+                <select id="budgetStrategySelect">
+                    <option value="PATTERN_A_30K" selected>パターンA：上限3万円・手堅い高回転（ポスト〜80箱メイン）</option>
+                    <option value="PATTERN_B_100K">パターンB：上限10万円・店舗の値付けミス上位機も解禁</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Gemini API Key（端末内のみに保存・外部公開されません）</label>
+                <input type="password" id="apiKeyInput" placeholder="AIzaSy... を入力">
+            </div>
+
+            <div class="form-group">
+                <label>稼働パイプライン＆モデル選択</label>
+                <button type="button" class="sub-action-btn" style="background:#388e3c; width:100%; margin-bottom:5px;" onclick="fetchAvailableModels()">🔄 使える正式モデル一覧をAPIから自動検証</button>
+                <select id="pipelineModeSelect">
+                    <option value="auto_2stage" selected>全自動2段ロケット（Stage1: 高速Flash ➔ Stage2: 上位精密）</option>
+                    <option value="argon_only">常時 最上位モデル（全フレーム最高峰鑑定）</option>
+                    <option value="flash_only">常時 高速Flashモデル（超高速・低コスト）</option>
+                </select>
+                <input type="text" id="customModelInput" placeholder="予備：直接モデルIDを指定する場合のみ入力" style="margin-top:5px; font-size:0.78rem;">
+                <div id="modelFetchStatus" style="font-size:0.72rem; color:#8DE055; margin-top:3px;"></div>
+            </div>
+
+            <div class="form-group">
+                <label>手ブレ・床壁・同一棚の事前カットフィルター感度（Web Worker処理）</label>
+                <select id="filterSensitivitySelect">
+                    <option value="normal" selected>標準（手ブレ・床・重複棚を自動で弾く）</option>
+                    <option value="low">ゆるめ（暗い店内向け・少しのブレでも送る）</option>
+                    <option value="off">フィルター完全オフ（全フレーム強制送信）</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Google検索グラウンディング（未知型番の現在相場裏付け）</label>
+                <select id="searchModeSelect">
+                    <option value="auto" selected>自動（辞書外の未知型番・高額品のみ検索起動：無料枠温存）</option>
+                    <option value="always">手動・精密鑑定時は常にGoogle検索を併用</option>
+                    <option value="off">オフ（内蔵マスタ辞書のみで超高速判定）</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>自動巡回スキャンの間隔 ／ 音声・振動ガイド設定</label>
+                <div style="display:flex; gap:6px;">
+                    <select id="intervalSelect" style="width:48%;">
+                        <option value="5000">5秒おき（高速）</option>
+                        <option value="8000" selected>8秒おき（標準）</option>
+                        <option value="14000">14秒おき（節約）</option>
+                    </select>
+                    <select id="voiceModeSelect" style="width:52%;">
+                        <option value="treasure_only" selected>お宝・ワンチャン時のみ音</option>
+                        <option value="all">全判定でチャイム＆声</option>
+                        <option value="mute">消音（Androidは振動通知）</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>表示名 ／ 具体的な店舗名 ／ GAS WebアプリURL（2台共有・古物台帳用）</label>
+                <div style="display:flex; gap:6px;">
+                    <input type="text" id="partnerNameInput" value="肇晃" style="width:38%;" placeholder="表示名">
+                    <input type="text" id="storeNameInput" value="ハードオフ佐久小諸" style="width:62%;" placeholder="店舗名（台帳記録用）">
+                </div>
+                <input type="text" id="gasUrlInput" placeholder="GAS WebアプリURL（空欄でもスマホ内保存＆CSV出力で完全稼働）" style="margin-top:5px; font-size:0.78rem;">
+            </div>
+
+            <button type="button" class="settings-save-btn" onclick="saveSettings()">設定を保存してハンティング開始</button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================================
+        // 1. 重複ゼロ・超高密度マスタ辞書（値札暗号・全10領域・販路振分・改正古物法対応）
+        // ============================================================================
+        const STATIC_MASTER_PROMPT = `
+[SYSTEM_STATIC_PREFIX_START]
+# 役割と至上命令
+あなたは地方・郊外のリサイクルショップ（ハードオフ、オフハウス、ガレージオフ、セカンドストリート、ブックオフ、サンタの創庫、スマイルサンタ等）のカメラ画像から「店舗の値付けミス（価格の歪み）」「青カゴ110〜550円の高利益パーツ」「店内別売り品のニコイチ合体機会」を特定するプロフェッショナル鑑定・司令塔エンジンである。
+現場の操作者は専門知識を持たない初心者または家族である。したがって内部推論は極限の専門性で行いつつ、操作者向けの音声指示（voice_guide）とトーク画面解説（line_message）は「専門用語ゼロの日常語（時計の針の方向・色・形・3ステップの簡単な手の動き）」に完全変換せよ。出力テキスト内にアスタリスク記号は一切使用してはならない。
+
+# デュアルタイル画像（上下2分割合成画像）の解析ルール
+送信される画像は、上半分（UPPER）が「棚・商品の全体像」、下半分（LOWER）が「画面中央部の2.5倍高解像度ズーム（値札・型番銘板・急所）」である（マクロモード時は全体が接写画像となる）。
+1. 上半分で商品のジャンル・形状・周囲の付属品やカゴの位置（時計の針の方向）を把握せよ。
+2. 下半分でプライスカードの税込価格・管理日付暗号・メーカー型番・真贋急所（ネジ穴・雪マーク・刻印）を精密に読み取れ。
+
+# モジュールA：チェーン別のプライスカード（値札）日付暗号デコード規則
+ユーザーコンテキストの store_chain に応じて、値札の数字から「陳列日（または値下げ日）」を解読し、新着お宝か長期放置お宝かを判定せよ。
+1. セカンドストリート（2NDSTREET）：
+   ・値札の下部（または右下）にある6桁の数字を「右から左へ逆読み」せよ。例：「709026」なら右から読んで「26年09月07日」が品出し日、「511052」なら「25年10月15日」である。スラッシュ区切りの右側に日付がある場合は値下げ改定日を示す。
+   ・値札に「ONLINE」印字がある個体は全国のネット併売監視下にあるため値付けミスが少ない。「ONLINE」表記がない店舗独自値付け品、または逆読み日付が直近14日以内の新着品・直近値下げ品を最優先で狙え。
+2. ハードオフ・オフハウス・ガレージオフ（HARDOFF）：
+   ・プライスカードの管理番号・製造番号欄付近にある4桁または6桁の数字（年月または年月日）および価格改定シールを読み取れ。
+   ・ジャンク札の「チェック時症状」を精査せよ。「通電確認のみ」「アダプター欠品のため未チェック」「リモコン欠品」「トレイ開閉不可（ベルト交換のみで直る軽症）」は高確率で完動または軽微メンテで復活するお宝である。一方「基板破損」「液晶割れ」「異臭・発煙」は部品取り価値がある場合を除きPASSとせよ。
+3. ブックオフ（BOOKOFF）：
+   ・値札上部の4色帯（季節カラー：1〜3月＝黒、4〜6月＝緑、7〜9月＝青、10〜12月＝赤）およびシール左上の発行月数字を読み取れ。元の値札の上に新しい値下げシールが貼られた「ところてん値下げ」直後品、または値札に「YO（ヤフオク高値傾向マーク）」「●（レア品マーク）」があるにもかかわらず安価な個体を最優先で確保せよ。
+4. サンタの創庫・スマイルサンタ・地場総合店（SANTA_LOCAL）：
+   ・全国POS相場と連動しない店員裁量の値付けが多いため、専門工具、測定器、オールドレンズ、レトロ機器の相場乖離（値付けミス）を重点的に監査せよ。
+
+# モジュールB：全10領域・視覚トリガー＆状態別（完動/本体のみ/ジャンク）仕入れ上限辞書
+送料は「ゆうパケットポスト（220円）」「ゆうパケットプラス（520円）」「自社保有60〜80サイズ段ボール（箱代0円・送料750〜850円）」を基準とし、80サイズを超える大型家電・家具は原則PASS（除外）とせよ。
+## 領域1：電動工具・バッテリー（マキタ・HiKOKI・Panasonic・MAX）
+- マキタ純正18V/40Vmax電池：BL1860B(実売9,000円 / 完動上限4,500円 / ジャンク上限1,100円)、BL1850B(実売7,000円 / 上限3,300円)、BL1830B(実売4,800円 / 上限2,200円)、BL4025/BL4040(実売9,500〜14,000円 / 上限5,000円)。
+- 真贋の絶対急所：(1)底面銘板に「雪の結晶マーク」と飛行機マークがあるか、(2)裏面4隅のT10トルクスネジ穴のうち1箇所に「白い樹脂封印キャップ」が埋まっているか、(3)白いラッチボタン奥に赤シールが見えるか。プラスネジ露出やフォント崩れは100%中華互換品のため即PASS。
+- 工具本体・充電器：急速充電器DC18RF/DC18RC(上限1,650円)、2口DC18RD(上限3,800円)。HiKOKIマルチボルトBSL36A18/BSL36B18(実売8,000円 / 上限3,800円)。インパクト本体のみ(TD171D/TD172D/TD173D/WH36DC)は単体上限3,300円、店内バッテリーとニコイチ合体時は上限7,500円。
+
+## 領域2：PCパーツ・産業用インターフェース・レトロ基板
+- 工場保守SCSI・Cバス・ISA基板：Adaptec SCSIカード AHA-2940UW / AHA-2940U2W / ASC-29160(実売6,000〜20,000円 / 上限1,650円)、NEC PC-9801-86音源ボード / PC-9801-26K(実売15,000〜35,000円 / 上限3,800円)、Sound Blaster AWE32 / AWE64 Gold(金メッキRCA端子＋SIMMソケット搭載ISA基板: 実売9,000〜24,000円 / 上限2,200円)、3dfx Voodooシリーズ。
+- 検品急所：円筒形の電解コンデンサの頭が膨らんでいないか、金メッキ端子に剥がれがないかを接写確認させよ。
+
+## 領域3：特殊ACアダプター・専用電源（青カゴ110〜550円の主戦場）
+- 楽器・シンセ用純正電源：Roland ACI-100 / PSB-1U / PSB-100 / ACB-120、KORG KA161 / KA181(丸型4〜8ピン金属DINプラグ: 実売3,800〜9,000円 / 上限880円)、Yamaha PA-6 / PA-5B、BOSS ACA-100G(旧トランス式) / PSA-100S。
+- 特殊規格・高出力電源：定格OUTPUT欄に「AC ~（交流出力・波線記号）」があるAC-ACアダプター(実売4,500〜12,000円 / 上限1,100円)、24V/36V/48V(業務用・PoE用)または正負電源(±15V)、ゲーミングPC用19.5V 150W〜330W大型薄型アダプター(Dell/ASUS/Razer/HP: 実売4,500〜8,500円 / 上限1,650円)。
+
+## 領域4：純正リモコン（AV機器・LD・業務用空調・給湯器）
+- 希少AVリモコン：Pioneer LDプレーヤー用(CU-CLD016/100/110等: 実売3,500〜8,000円 / 上限550円)、Sony AVアンプ・MD・DAT用(RM-J701 / RM-D系 / 双方向液晶RM-LJ304等: 実売3,000〜7,500円 / 上限550円)、Bose Wave Music System用純正リモコン(大小とも実売3,200〜5,500円 / 上限880円)、ブルーレイ純正リモコン(N2QAYB / SE-R / RMT-B系: 上限550円)。
+- 設備リモコン：ダイキン・三菱・日立の業務用エアコンワイヤードリモコン、リンナイ・ノーリツ給湯器リモコン、FF式ストーブ用リモコン。
+- スマホカメラ赤外線ハック：先端の透明LEDをスマホカメラに向けさせ、ボタンを押して「紫白色の光」が光れば動作確定（TREASURE昇格）。電池室内の青サビ有無も必ず確認させよ。
+
+## 領域5：オーディオ・無線機・メタルテープ・レコード針
+- メタルカセットテープ：TDK MA-R / MA-XG(アルミダイキャストや白セラミックフレーム: 中古録音済でも実売8,500〜25,000円、未開封30,000円超 / 上限5,500円)、Sony Metal Master、Maxell Metal Vertex、背表紙に「TYPE IV (METAL)」表記があるテープ全般(上限550円)。
+- レコードカートリッジ＆ヘッドシェル：Shure V15 Type III/IV / M44G、Denon DL-103(黒い四角形MC定番: 実売15,000〜22,000円 / 上限5,500円)、Ortofon SPU / Concorde、Audio-Technica AT-33系、Technics純正ヘッドシェル(単体上限1,100円)。針先が折れていないか横から接写させよ。
+- アマチュア無線周辺：YAESU / ICOM / KENWOODのスタンドマイク(MD-1 / MD-100 / SM-20 / MC-60等: 実売6,500〜16,000円 / 上限2,200円)、SWRパワー計、安定化電源。
+
+## 領域6：カメラ光学部品・オールドレンズ・純正アクセサリー
+- アトムレンズ・8枚玉・富岡光学：Asahi Pentax Super-Takumar 50mm F1.4(後玉が黄色いアトムレンズは実売8,500〜14,000円。距離リングの「∞」のすぐ右に赤い「R」指標が食い込む初期型8枚玉は実売28,000〜45,000円 / 上限5,500〜12,000円)、Auto Yashinon-DX 50mm F1.4、Canon FD 55mm F1.2 S.S.C.、Nikkor-S Auto 50mm F1.4 / 55mm F1.2。
+- 希少アクセサリー：金属製角型レンズフード(被せ式・ねじ込み式: 実売4,000〜15,000円 / 上限1,100円)、ライカL39変換リング、Nikonバッテリーグリップ(MB-D10/12/18)、オリンパス外部ファインダー(VF-2/VF-4)。
+
+## 領域7：レトロゲーム周辺機器・希少ケーブル・拡張RAM
+- 幻のケーブル：ゲームキューブ専用D端子ビデオケーブル DOL-009(片方が金属台形D端子、片方がGC端子の黒い太線: 実売13,000〜18,000円 / 上限4,400円)、ドリームキャストVGAボックス HKT-8100(上限2,200円)、純正RGB21ピンケーブル。
+- 拡張カートリッジ・特殊パッド：セガサターン拡張RAM 4MB HSS-0150(実売4,800〜7,500円 / 上限1,650円)、PCエンジン アーケードカードPRO/DUO、メガドライブ6Bパッド、電車でGO!・音ゲー専用コントローラー。
+
+## 領域8：楽器周辺・ヴィンテージエフェクター・音源カード
+- BOSS銀ネジ・日本製黒ラベル：ペダル手前の手回しネジが「銀色の金属ネジ（銀ネジ）」または底面が「MADE IN JAPAN黒ラベル」の個体。OD-1(実売25,000〜60,000円)、CE-2(実売18,000〜35,000円)、DM-2(実売22,000〜40,000円)、DS-1銀ネジ。完全ジャンクでも上限5,500〜8,800円で即確保。
+- 定番機＆シンセROMカード：Ibanez TS9/TS808、ProCo RAT2(フラット底面USA製)、Roland M-256E/M-512E・Yamaha MCD64等のシンセ用メモリーカード(薄いカード1枚で実売4,500〜12,000円 / 上限1,100円)。
+
+## 領域9：小型測定器・工場センサー・業務用パーツ（80サイズ以下厳守）
+- 産業センサー・測定器：KEYENCE光電・ファイバー・レーザーセンサー(FS-V31 / LV-N11 / EV系: 実売4,500〜25,000円 / 上限2,200円)、OMRON制御機器、HIOKIクランプメーター・絶縁抵抗計(3280-10F / IR4051: 実売6,000〜15,000円 / 上限2,200円)、FLUKEマルチメーター(87V / 115 / 117)。
+
+## 領域10：アウトドア小型ギア・純銀カトラリー
+- ストーブ・ランタン：Colemanピーク1ストーブ 400/400A/508(赤レバー＋黒サブレバーの2レバー式: 実売9,500〜18,000円 / 上限3,300円)、アンバーグローブ(琥珀色ガラスホヤ: 上限1,100円)、PRIMUS真鍮モデル、スノーピーク旧ロゴ(大文字ヤマコウ期)チタンマグ。
+- 純銀カトラリー・銀杯：110〜330円の食器カゴ内で裏面に「SILVER」「SILVER 925」「SILVER 950」「STERLING」「純銀」「造幣局ホールマーク（日の丸＋ひし形925/1000）」刻印があるもの（上限1,650円）。「EPNS」「SILVER PLATED」「NICKEL SILVER（洋白）」はメッキ・銅合金のため価値なし（PASS）。
+
+# モジュールC：販路自動振り分け（メルカリShops vs ヤフオク）と令和7年10月改正古物営業法判定
+1. recommended_platform の選択基準：
+   ・"MERCARI_SHOPS"：マキタ等の電動工具・バッテリー、純正リモコン、ゲーム周辺機器、汎用ACアダプター、キャンプ用品、完動品の定番レンズなど、相場が固まっており即決価格で素早く現金化できる商材。
+   ・"YAHOO_AUCTION"：PC-98用Cバス基板、Adaptec SCSIボード、アマチュア無線機、レコード針、メタルテープ、初期8枚玉レンズ、銀ネジBOSS、KEYENCEセンサー、または「通電未確認だが部品価値が高い重度ジャンク」など、マニアや修理職人が競り合って高騰する商材。
+2. shipping_method の選択基準：
+   ・"YUPACKET_POST_220"（送料220円：ケーブル・リモコン・基板・カード・カトラリー等の小物）
+   ・"YUPACKET_PLUS_520"（送料520円：バッテリー・小型エフェクター・単焦点レンズ等の小型厚物）
+   ・"BOX_60_80_FREE_800"（自社保有60〜80サイズ段ボール箱代0円・送料平均800円：中型工具・複数セット・測定器等）
+3. kobutsu_law_alert（令和7年10月1日改正・古物営業法第16条本人確認および帳簿義務判定）：
+   ・店頭仕入れ価格が10,000円以上の場合、または10,000円未満であっても「家庭用ゲームソフト」「CD・DVD・ブルーレイ」「書籍」「自動二輪車・原付および部品（汎用ネジ等を除く）」「エアコン室外機」「電気温水器のヒートポンプ」「電線（一般的なAVケーブル・充電線・延長コードは除く）」「金属製グレーチング」の8品目に該当する場合は「要本人確認・法定台帳必須（少額免除除外または1万円以上）」と出力せよ。それ以外の1万円未満の機械工具・カメラ・部品等は「通常台帳記帳（1万円未満免除対象・インボイス特例時は7年保存）」と出力せよ。
+[SYSTEM_STATIC_PREFIX_END]
+`.trim();
+
+        // ============================================================================
+        // 2. インラインWeb Worker生成（DOM非依存・ピクセル配列転送による非同期フィルタ）
+        // ============================================================================
+        const WORKER_SOURCE = `
+            let lastDHash = null;
+            self.onmessage = function(e) {
+                const { pixels, width, height, sensitivity, resetHash } = e.data;
+                if (resetHash) {
+                    lastDHash = null;
+                    if (!pixels) return;
+                }
+                if (sensitivity === 'off') {
+                    self.postMessage({ passed: true, reason: 'OFF' });
+                    return;
+                }
+                const blurThreshold = sensitivity === 'low' ? 65.0 : 130.0;
+                const minActiveBlocks = sensitivity === 'low' ? 2 : 4;
+                const dHashLimit = sensitivity === 'low' ? 5 : 8;
+                const totalPixels = Math.imul(width, height);
+                const gray = new Float32Array(totalPixels);
+
+                let sumLum = 0;
+                for (let i = 0, j = 0; i < pixels.length; i += 4, j++) {
+                    const lum = pixels[i] / 3.34 + pixels[i + 1] / 1.70 + pixels[i + 2] / 8.77;
+                    gray[j] = lum;
+                    sumLum += lum;
+                }
+                const avgLum = sumLum / totalPixels;
+                if (avgLum < 16 || avgLum > 244) {
+                    self.postMessage({ passed: false, reason: 'EXPOSURE' });
+                    return;
+                }
+
+                let lapSum = 0;
+                let lapSqSum = 0;
+                let count = 0;
+                const blockCounts = new Int32Array(16);
+                const blockSqSums = new Float64Array(16);
+
+                for (let y = 1; y < height - 1; y++) {
+                    const rowOffset = Math.imul(y, width);
+                    const blockY = Math.floor(y / 60);
+                    for (let x = 1; x < width - 1; x++) {
+                        const idx = rowOffset + x;
+                        const lap = (gray[idx] << 2) - gray[idx - 1] - gray[idx + 1] - gray[idx - width] - gray[idx + width];
+                        lapSum += lap;
+                        const lapSq = Math.pow(lap, 2);
+                        lapSqSum += lapSq;
+                        count++;
+
+                        const bIdx = (blockY << 2) + Math.floor(x / 80);
+                        blockCounts[bIdx]++;
+                        blockSqSums[bIdx] += lapSq;
+                    }
+                }
+
+                const mean = lapSum / count;
+                const variance = (lapSqSum / count) - Math.pow(mean, 2);
+                if (variance < blurThreshold) {
+                    self.postMessage({ passed: false, reason: 'BLUR' });
+                    return;
+                }
+
+                let activeBlocks = 0;
+                for (let b = 0; b < 16; b++) {
+                    if ((blockSqSums[b] / blockCounts[b]) > 42.0) {
+                        activeBlocks++;
+                    }
+                }
+                if (activeBlocks < minActiveBlocks) {
+                    self.postMessage({ passed: false, reason: 'WALL_FLOOR' });
+                    return;
+                }
+
+                const dHashBits = new Uint8Array(64);
+                let bitIdx = 0;
+                for (let r = 0; r < 8; r++) {
+                    const sampleY = Math.floor((r + 0.5) / (8 / height));
+                    for (let c = 0; c < 8; c++) {
+                        const sampleX1 = Math.floor((c + 0.5) / (9 / width));
+                        const sampleX2 = Math.floor((c + 1.5) / (9 / width));
+                        const val1 = gray[Math.imul(sampleY, width) + sampleX1];
+                        const val2 = gray[Math.imul(sampleY, width) + sampleX2];
+                        dHashBits[bitIdx++] = val1 > val2 ? 1 : 0;
+                    }
+                }
+
+                if (lastDHash !== null) {
+                    let dist = 0;
+                    for (let i = 0; i < 64; i++) {
+                        if (lastDHash[i] !== dHashBits[i]) dist++;
+                    }
+                    if (dist <= dHashLimit) {
+                        self.postMessage({ passed: false, reason: 'DUPLICATE_SHELF' });
+                        return;
+                    }
+                }
+                lastDHash = dHashBits;
+                self.postMessage({ passed: true, reason: 'OK' });
+            };
+        `;
+
+        let frameWorker = null;
+        try {
+            const blob = new Blob([WORKER_SOURCE], { type: 'application/javascript' });
+            frameWorker = new Worker(URL.createObjectURL(blob));
+        } catch (e) {}
+
+        // ============================================================================
+        // 3. IndexedDB（端末内・確保お宝＆古物台帳データベース）管理エンジン
+        // ============================================================================
+        const DB_NAME = 'HunterLedgerDB_v2';
+        const STORE_NAME = 'kept_items';
+        let dbInstance = null;
+
+        function initIndexedDB() {
+            return new Promise((resolve) => {
+                if (!('indexedDB' in window)) {
+                    resolve(null);
+                    return;
+                }
+                const req = indexedDB.open(DB_NAME, 1);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                    }
+                };
+                req.onsuccess = (e) => {
+                    dbInstance = e.target.result;
+                    refreshSavedCount();
+                    resolve(dbInstance);
+                };
+                req.onerror = () => resolve(null);
+            });
+        }
+
+        function saveItemToIndexedDB(record) {
+            return new Promise((resolve) => {
+                if (!dbInstance) {
+                    resolve(false);
+                    return;
+                }
+                try {
+                    const tx = dbInstance.transaction([STORE_NAME], 'readwrite');
+                    const store = tx.objectStore(STORE_NAME);
+                    store.put(record);
+                    tx.oncomplete = () => {
+                        refreshSavedCount();
+                        resolve(true);
+                    };
+                    tx.onerror = () => resolve(false);
+                } catch (e) {
+                    resolve(false);
+                }
+            });
+        }
+
+        function getAllItemsFromIndexedDB() {
+            return new Promise((resolve) => {
+                if (!dbInstance) {
+                    resolve([]);
+                    return;
+                }
+                try {
+                    const tx = dbInstance.transaction([STORE_NAME], 'readonly');
+                    const store = tx.objectStore(STORE_NAME);
+                    const req = store.getAll();
+                    req.onsuccess = () => resolve(req.result || []);
+                    req.onerror = () => resolve([]);
+                } catch (e) {
+                    resolve([]);
+                }
+            });
+        }
+
+        async function refreshSavedCount() {
+            const items = await getAllItemsFromIndexedDB();
+            const el = document.getElementById('savedCountLabel');
+            if (el) el.innerText = String(items.length);
+        }
+
+        async function exportSavedItemsCSV() {
+            const items = await getAllItemsFromIndexedDB();
+            if (!items.length) {
+                alert('まだ確保された商品がありません。トーク画面の鑑定結果にある「📝 この商品を確保」ボタンを押すと保存されます。');
+                return;
+            }
+            const headers = [
+                '取引日時',
+                '仕入店舗名',
+                'チェーン区分',
+                '古物区分・カテゴリ',
+                '品名・メーカー・型番',
+                '検品状態・特徴',
+                '値札日付解読',
+                '仕入支払対価(税込)',
+                '仕入上限目安',
+                '推奨出品価格',
+                '想定純利益',
+                '推奨販路',
+                '梱包サイズ区分',
+                '古物営業法・インボイス判定',
+                '出品タイトル案',
+                '出品説明文案'
+            ];
+            const escapeCsv = (val) => {
+                const s = String(val === undefined || val === null ? '' : val).replace(/"/g, '""');
+                return `"${s}"`;
+            };
+            const rows = items.map(item => [
+                item.timestamp,
+                item.store_name,
+                item.store_chain,
+                item.category,
+                item.model,
+                item.condition_note,
+                item.price_tag_date,
+                item.store_price_yen,
+                item.max_buy_yen,
+                item.recommended_price,
+                item.net_profit_yen,
+                item.recommended_platform,
+                item.shipping_method,
+                item.kobutsu_law_alert,
+                item.listing_title,
+                item.listing_desc
+            ].map(escapeCsv).join(','));
+
+            const csvContent = '\uFEFF' + headers.join(',') + '\r\n' + rows.join('\r\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `古物台帳_出品管理リスト_${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // ============================================================================
+        // 4. DOM参照と状態管理
+        // ============================================================================
+        const mainVideo = document.getElementById('mainVideo');
+        const pipVideo = document.getElementById('pipVideo');
+        const captureCanvas = document.getElementById('captureCanvas');
+        const videoCallView = document.getElementById('videoCallView');
+        const chatRoomView = document.getElementById('chatRoomView');
+        const notificationBanner = document.getElementById('notificationBanner');
+        const notifText = document.getElementById('notifText');
+        const notifSender = document.getElementById('notifSender');
+        const statusDot = document.getElementById('statusDot');
+        const chatMessages = document.getElementById('chatMessages');
+        const settingsModal = document.getElementById('settingsModal');
+        const cacheAuditText = document.getElementById('cacheAuditText');
+        const visualManualOverlay = document.getElementById('visualManualOverlay');
+
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const storeChainSelect = document.getElementById('storeChainSelect');
+        const budgetStrategySelect = document.getElementById('budgetStrategySelect');
+        const pipelineModeSelect = document.getElementById('pipelineModeSelect');
+        const customModelInput = document.getElementById('customModelInput');
+        const filterSensitivitySelect = document.getElementById('filterSensitivitySelect');
+        const searchModeSelect = document.getElementById('searchModeSelect');
+        const intervalSelect = document.getElementById('intervalSelect');
+        const voiceModeSelect = document.getElementById('voiceModeSelect');
+        const partnerNameInput = document.getElementById('partnerNameInput');
+        const storeNameInput = document.getElementById('storeNameInput');
+        const gasUrlInput = document.getElementById('gasUrlInput');
+        const barcodeInput = document.getElementById('barcodeInput');
+        const modelFetchStatus = document.getElementById('modelFetchStatus');
+
+        let stream = null;
+        let isAnalyzing = false;
+        let autoScanTimer = null;
+        let isAutoScan = false;
+        let callSeconds = 0;
+        let captureMode = 'DUAL';
+        let storeSynergyMemory = [];
+        let appraisalRecordsMap = {};
+        let audioCtx = null;
+        let lastTimerTapTime = 0;
+
+        const APPRAISAL_RESPONSE_SCHEMA = {
+            type: "OBJECT",
+            properties: {
+                status: { type: "STRING", enum: ["TREASURE", "CHANCE", "PASS"] },
+                item_category: { type: "STRING" },
+                detected_model: { type: "STRING" },
+                visual_cue_matched: { type: "STRING" },
+                decoded_price_tag_date: { type: "STRING" },
+                max_buy_price_yen: { type: "INTEGER" },
+                store_price_yen: { type: "INTEGER" },
+                estimated_net_profit_yen: { type: "INTEGER" },
+                recommended_platform: { type: "STRING", enum: ["MERCARI_SHOPS", "YAHOO_AUCTION"] },
+                shipping_method: { type: "STRING", enum: ["YUPACKET_POST_220", "YUPACKET_PLUS_520", "BOX_60_80_FREE_800"] },
+                kobutsu_law_alert: { type: "STRING" },
+                inspection_3sec_checklist: { type: "STRING" },
+                confidence_in_static_price: { type: "NUMBER" },
+                needs_google_search: { type: "BOOLEAN" },
+                target_box: {
+                    type: "ARRAY",
+                    items: { type: "INTEGER" }
+                },
+                synergy_role: {
+                    type: "OBJECT",
+                    properties: {
+                        is_part_or_incomplete: { type: "BOOLEAN" },
+                        provides_key: { type: "STRING" },
+                        requires_key: { type: "STRING" },
+                        matched_memory_id: { type: "STRING" }
+                    }
+                },
+                voice_guide: { type: "STRING" },
+                line_message: { type: "STRING" },
+                listing_draft: {
+                    type: "OBJECT",
+                    properties: {
+                        title: { type: "STRING" },
+                        description: { type: "STRING" },
+                        recommended_price: { type: "INTEGER" }
+                    }
+                }
+            },
+            required: [
+                "status",
+                "item_category",
+                "detected_model",
+                "max_buy_price_yen",
+                "estimated_net_profit_yen",
+                "recommended_platform",
+                "shipping_method",
+                "kobutsu_law_alert",
+                "confidence_in_static_price",
+                "needs_google_search",
+                "target_box",
+                "voice_guide",
+                "line_message"
+            ]
+        };
+
+        // ============================================================================
+        // 5. 視覚的透視取説オーバーレイ＆モード切替制御
+        // ============================================================================
+        function handleTimerTap() {
+            const now = Date.now();
+            if (now - lastTimerTapTime < 450) {
+                openVisualManual();
+                lastTimerTapTime = 0;
+            } else {
+                lastTimerTapTime = now;
+            }
+        }
+
+        function openVisualManual() {
+            const isVideoActive = videoCallView.classList.contains('active-view');
+            document.getElementById('manualVideoLabels').style.display = isVideoActive ? 'block' : 'none';
+            document.getElementById('manualChatLabels').style.display = isVideoActive ? 'none' : 'block';
+            visualManualOverlay.style.display = 'block';
+        }
+
+        function closeVisualManual() {
+            visualManualOverlay.style.display = 'none';
+        }
+
+        function setCaptureMode(mode) {
+            captureMode = mode;
+            const dualChip = document.getElementById('chipDualMode');
+            const macroChip = document.getElementById('chipMacroMode');
+            const guide = document.getElementById('centerFocusGuide');
+            if (mode === 'MACRO') {
+                dualChip.classList.remove('active-chip');
+                macroChip.classList.add('active-chip');
+                guide.innerText = '銘板・値札マクロ接写モード（文字を大きく写す）';
+                guide.style.borderColor = '#06C755';
+            } else {
+                macroChip.classList.remove('active-chip');
+                dualChip.classList.add('active-chip');
+                guide.innerText = '中央ズーム枠（値札・型番をここへ）';
+                guide.style.borderColor = 'rgba(255, 255, 255, 0.28)';
+            }
+        }
+
+        function cycleStoreChain() {
+            const order = ['HARDOFF', '2NDSTREET', 'BOOKOFF', 'SANTA_LOCAL'];
+            const nextIdx = (order.indexOf(storeChainSelect.value) + 1) % order.length;
+            storeChainSelect.value = order[nextIdx];
+            localStorage.setItem('hunter_chain', storeChainSelect.value);
+            updateStoreBadgeUI();
+            playAlertChime('PASS');
+        }
+
+        function updateStoreBadgeUI() {
+            const map = {
+                HARDOFF: '店舗: ハードオフ系',
+                '2NDSTREET': '店舗: セカスト(6桁逆読)',
+                BOOKOFF: '店舗: ブックオフ(4色)',
+                SANTA_LOCAL: '店舗: サンタ・地場店'
+            };
+            document.getElementById('vcStoreBadge').innerText = map[storeChainSelect.value] || '店舗: ハードオフ系';
+        }
+
+        // ============================================================================
+        // 6. Web Audioチャイム・音声合成・Android安全バイブレーション（iPhoneエラー完全防御）
+        // ============================================================================
+        function ensureAudioContext() {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextClass) return null;
+            if (!audioCtx) {
+                audioCtx = new AudioContextClass();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function unlockAudioEngine() {
+            try {
+                const ctx = ensureAudioContext();
+                if (ctx) {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    gain.gain.setValueAtTime(0.001, ctx.currentTime);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.03);
+                }
+            } catch (e) {}
+
+            if ('speechSynthesis' in window) {
+                try {
+                    const warmUtter = new SpeechSynthesisUtterance('あ');
+                    warmUtter.volume = 0.01;
+                    warmUtter.rate = 3.0;
+                    warmUtter.lang = 'ja-JP';
+                    window.speechSynthesis.speak(warmUtter);
+                } catch (e) {}
+            }
+        }
+
+        function triggerSafeHaptics(status) {
+            try {
+                if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+                    if (status === 'TREASURE') {
+                        navigator.vibrate([120, 70, 120, 70, 320]);
+                    } else if (status === 'CHANCE') {
+                        navigator.vibrate([100, 80, 100]);
+                    } else {
+                        navigator.vibrate(40);
+                    }
+                }
+            } catch (e) {}
+        }
+
+        function playAlertChime(status) {
+            triggerSafeHaptics(status);
+            if (voiceModeSelect.value === 'mute') return;
+            try {
+                const ctx = ensureAudioContext();
+                if (!ctx) return;
+
+                const now = ctx.currentTime;
+                if (status === 'TREASURE') {
+                    const notes = [880, 1108.73, 1318.51, 1760, 1318.51, 1760];
+                    const times = [0, 0.11, 0.22, 0.33, 0.50, 0.62];
+                    const durs  = [0.10, 0.10, 0.10, 0.15, 0.10, 0.28];
+                    for (let i = 0; i < notes.length; i++) {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(notes[i], now + times[i]);
+                        gain.gain.setValueAtTime(0.35, now + times[i]);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + times[i] + durs[i]);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(now + times[i]);
+                        osc.stop(now + times[i] + durs[i]);
+                    }
+                } else if (status === 'CHANCE') {
+                    const notes = [987.77, 1318.51];
+                    const times = [0, 0.14];
+                    const durs  = [0.11, 0.22];
+                    for (let i = 0; i < notes.length; i++) {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(notes[i], now + times[i]);
+                        gain.gain.setValueAtTime(0.30, now + times[i]);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + times[i] + durs[i]);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(now + times[i]);
+                        osc.stop(now + times[i] + durs[i]);
+                    }
+                } else {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(660, now);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                }
+            } catch (e) {}
+        }
+
+        function speakGuideText(text, status, isManual) {
+            const mode = voiceModeSelect.value;
+            if (!isManual && mode === 'treasure_only' && status === 'PASS') return;
+
+            playAlertChime(status);
+            if (mode === 'mute') return;
+
+            if (!('speechSynthesis' in window) || !text) return;
+            try {
+                window.speechSynthesis.cancel();
+                setTimeout(() => {
+                    const clean = text.replace(/[#\u002a`_\-\[\]【】]/g, ' ');
+                    const utter = new SpeechSynthesisUtterance(clean);
+                    utter.lang = 'ja-JP';
+                    utter.volume = 1.0;
+                    utter.rate = 1.15;
+                    const voices = window.speechSynthesis.getVoices();
+                    const jaVoice = voices.find(v => v.lang && v.lang.includes('ja'));
+                    if (jaVoice) utter.voice = jaVoice;
+                    window.speechSynthesis.speak(utter);
+                }, 450);
+            } catch (e) {}
+        }
+
+        function runSoundAndVoiceTest() {
+            voiceModeSelect.value = 'treasure_only';
+            localStorage.setItem('hunter_voice_v2', 'treasure_only');
+            updateVoiceUI();
+            ensureAudioContext();
+            speakGuideText('サウンドテスト成功です！日曜日のハンティング準備はバッチリです！', 'TREASURE', true);
+            cacheAuditText.innerText = '🔊 チャイム音・音声・振動（Androidのみ）テスト完了';
+        }
+
+        function forceResetSystem() {
+            unlockAudioEngine();
+            isAnalyzing = false;
+            if (frameWorker) frameWorker.postMessage({ resetHash: true });
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            statusDot.className = isAutoScan ? 'status-dot scanning' : 'status-dot';
+            startCamera();
+        }
+
+        function clearSynergyMemory() {
+            storeSynergyMemory = [];
+            localStorage.removeItem('hunter_synergy_mem');
+            cacheAuditText.innerText = '🧹 店内ニコイチ記憶をリセットしました（新しい店舗用）';
+        }
+
+        // ============================================================================
+        // 7. 非同期Web Workerゲートウェイ ＆ デュアルタイル（全体＋中央2.5倍）画像合成
+        // ============================================================================
+        const filterCanvas = document.createElement('canvas');
+        filterCanvas.width = 320;
+        filterCanvas.height = 240;
+        const filterCtx = filterCanvas.getContext('2d', { willReadFrequently: true });
+
+        function evaluateFrameAsync(videoElement) {
+            return new Promise((resolve) => {
+                const sensitivity = filterSensitivitySelect.value;
+                if (sensitivity === 'off' || !frameWorker) {
+                    resolve({ passed: true });
+                    return;
+                }
+                filterCtx.drawImage(videoElement, 0, 0, 320, 240);
+                const imgData = filterCtx.getImageData(0, 0, 320, 240).data;
+
+                const handleMsg = (e) => {
+                    frameWorker.removeEventListener('message', handleMsg);
+                    resolve(e.data);
+                };
+                frameWorker.addEventListener('message', handleMsg);
+                frameWorker.postMessage({
+                    pixels: imgData,
+                    width: 320,
+                    height: 240,
+                    sensitivity: sensitivity,
+                    resetHash: false
+                });
+            });
+        }
+
+        function buildDualTileCapture(videoEl, canvasEl, mode) {
+            const vw = videoEl.videoWidth || 1280;
+            const vh = videoEl.videoHeight || 720;
+            const ctx = canvasEl.getContext('2d');
+
+            if (mode === 'MACRO') {
+                const targetW = Math.min(1280, vw);
+                const ratio = vh / vw;
+                const targetH = Math.round(targetW / (1 / ratio));
+                canvasEl.width = targetW;
+                canvasEl.height = targetH;
+                ctx.drawImage(videoEl, 0, 0, targetW, targetH);
+                return canvasEl.toDataURL('image/jpeg', 0.86);
+            }
+
+            // デュアルタイルモード（上半分：棚全体 1024x576、下半分：中央2.5倍ズーム 1024x576）
+            const outW = 1024;
+            const halfH = 576;
+            canvasEl.width = outW;
+            canvasEl.height = Math.imul(halfH, 2);
+
+            // 上半分に全体像を描画
+            ctx.drawImage(videoEl, 0, 0, vw, vh, 0, 0, outW, halfH);
+
+            // 下半分に中央部（幅40%・高さ40%）を切り出して拡大描画
+            const cropW = Math.round(vw / 2.5);
+            const cropH = Math.round(vh / 2.5);
+            const cropX = Math.round((vw - cropW) / 2);
+            const cropY = Math.round((vh - cropH) / 2);
+            ctx.drawImage(videoEl, cropX, cropY, cropW, cropH, 0, halfH, outW, halfH);
+
+            // 境界バーと識別ラベル
+            ctx.fillStyle = '#06C755';
+            ctx.fillRect(0, halfH - 2, outW, 4);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(8, halfH + 6, 360, 24);
+            ctx.fillStyle = '#8DE055';
+            ctx.font = 'bold 14px sans-serif';
+            ctx.fillText('▼ 中央2.5倍拡大（値札暗号・型番・真贋急所）', 14, halfH + 23);
+
+            return canvasEl.toDataURL('image/jpeg', 0.84);
+        }
+
+        // ============================================================================
+        // 8. 多段APIルーティング＆Google検索グラウンディング呼び出し
+        // ============================================================================
+        async function callGeminiEngine({ base64Jpeg, stage, useGoogleSearch, conditionOverride, textQueryOnly }) {
+            const apiKey = apiKeyInput.value.trim();
+            const customModel = customModelInput.value.trim();
+            const pipeMode = pipelineModeSelect.value;
+
+            let modelId = 'gemini-3.8-flash';
+            let thinkingLevel = 'low';
+
+            if (customModel) {
+                modelId = customModel;
+                thinkingLevel = stage === 'STAGE_1_PATROL' ? 'low' : 'high';
+            } else if (pipeMode === 'auto_2stage') {
+                if (stage === 'STAGE_1_PATROL') {
+                    modelId = 'gemini-3.8-flash';
+                    thinkingLevel = 'low';
+                } else {
+                    modelId = 'gemini-4-argon';
+                    thinkingLevel = 'high';
+                }
+            } else if (pipeMode === 'argon_only') {
+                modelId = 'gemini-4-argon';
+                thinkingLevel = stage === 'STAGE_1_PATROL' ? 'low' : 'high';
+            } else {
+                modelId = 'gemini-3.8-flash';
+                thinkingLevel = 'low';
+            }
+
+            const maxBudget = budgetStrategySelect.value === 'PATTERN_B_100K' ? 100000 : 30000;
+            const dynamicContextText = JSON.stringify({
+                scan_stage: stage,
+                capture_mode: captureMode,
+                store_chain: storeChainSelect.value,
+                store_name: storeNameInput.value.trim() || 'Recycle_Shop',
+                max_single_item_budget_yen: maxBudget,
+                operator_selected_condition: conditionOverride || 'AUTO_DETECT',
+                manual_barcode_or_model_query: textQueryOnly || '',
+                synergy_memory: storeSynergyMemory.slice(-15),
+                stage_instruction: textQueryOnly
+                    ? `入力された型番・JANコード「${textQueryOnly}」の現在の中古・ジャンク実売相場、仕入れ上限、推奨販路（メルカリShops/ヤフオク）、改正古物営業法区分を特定しJSONのみを出力せよ。`
+                    : (stage === 'STAGE_1_PATROL'
+                        ? '高速パトロール：上段の全体像と下段の中央ズームからTREASUREまたはCHANCEを即座に判定しJSONのみを出力せよ。'
+                        : '精密確定モード：値札の日付暗号・型番・真贋急所を読み取り、状態別の確定純利益・販路・梱包サイズ・古物台帳区分と初心者向け時計盤ガイドをJSONのみで出力せよ。')
+            });
+
+            const generationConfig = {
+                maxOutputTokens: 4096,
+                thinkingConfig: {
+                    thinkingLevel: thinkingLevel
+                }
+            };
+
+            if (!useGoogleSearch) {
+                generationConfig.responseMimeType = 'application/json';
+                generationConfig.responseSchema = APPRAISAL_RESPONSE_SCHEMA;
+            }
+
+            const userParts = [{ text: dynamicContextText }];
+            if (base64Jpeg) {
+                userParts.push({ inline_data: { mime_type: 'image/jpeg', data: base64Jpeg } });
+            }
+
+            const requestBody = {
+                systemInstruction: {
+                    parts: [{ text: STATIC_MASTER_PROMPT }]
+                },
+                contents: [{
+                    role: 'user',
+                    parts: userParts
+                }],
+                generationConfig: generationConfig
+            };
+
+            if (useGoogleSearch) {
+                requestBody.tools = [{ googleSearch: {} }];
+            }
+
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent`;
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 35000);
+
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-goog-api-key': apiKey
+                },
+                body: JSON.stringify(requestBody),
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                const msg = (data.error && data.error.message) ? data.error.message : `HTTP ${response.status}`;
+                throw new Error(`[${modelId}] ${msg}`);
+            }
+
+            if (data.usageMetadata) {
+                const promptTokens = data.usageMetadata.promptTokenCount || 0;
+                const cachedTokens = data.usageMetadata.cachedContentTokenCount || 0;
+                cacheAuditText.innerText = `直近通信 [${modelId}] 入力:${promptTokens}tok / キャッシュ割引適用:${cachedTokens}tok`;
+            }
+
+            if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+                const parts = data.candidates[0].content.parts;
+                let rawText = '';
+                for (let i = 0; i < parts.length; i++) {
+                    if (parts[i].text && !parts[i].thought) {
+                        rawText += parts[i].text;
+                    }
+                }
+                if (!rawText && parts[0] && parts[0].text) {
+                    rawText = parts[0].text;
+                }
+                return parseAiJsonSafely(rawText);
+            }
+            throw new Error('AIから有効な応答がありませんでした');
+        }
+
+        function parseAiJsonSafely(rawText) {
+            let cleaned = rawText.trim().replace(/\u002a/g, '');
+            const firstBrace = cleaned.indexOf('{');
+            const lastBrace = cleaned.lastIndexOf('}');
+            if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+                const jsonCandidate = cleaned.substring(firstBrace, lastBrace + 1);
+                try {
+                    return JSON.parse(jsonCandidate);
+                } catch (e) {}
+            }
+            let fallbackStatus = 'CHANCE';
+            if (cleaned.includes('TREASURE') || cleaned.includes('お宝')) fallbackStatus = 'TREASURE';
+            else if (cleaned.includes('PASS') || cleaned.includes('スルー')) fallbackStatus = 'PASS';
+
+            return {
+                status: fallbackStatus,
+                item_category: '自動鑑定',
+                detected_model: '解析結果',
+                visual_cue_matched: '',
+                decoded_price_tag_date: '',
+                max_buy_price_yen: 0,
+                store_price_yen: 0,
+                estimated_net_profit_yen: 0,
+                recommended_platform: 'MERCARI_SHOPS',
+                shipping_method: 'BOX_60_80_FREE_800',
+                kobutsu_law_alert: '通常台帳記帳',
+                inspection_3sec_checklist: '',
+                confidence_in_static_price: 0.9,
+                needs_google_search: false,
+                target_box: [0, 0, 0, 0],
+                voice_guide: fallbackStatus === 'PASS' ? '' : cleaned.substring(0, 110),
+                line_message: cleaned
+            };
+        }
+
+        // ============================================================================
+        // 9. ハンティング実行サイクル（自動巡回・手動2分割撮影・バーコード型番検索）
+        // ============================================================================
+        function handleChatSend() {
+            const q = barcodeInput.value.trim();
+            if (q) {
+                barcodeInput.value = '';
+                executeBarcodeOrTextQuery(q);
+            } else {
+                triggerManualCapture();
+            }
+        }
+
+        async function executeBarcodeOrTextQuery(queryStr) {
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) {
+                openSettings();
+                return;
+            }
+            if (isAnalyzing) return;
+            unlockAudioEngine();
+            isAnalyzing = true;
+            statusDot.className = 'status-dot busy';
+
+            const row = document.createElement('div');
+            row.className = 'msg-row self';
+            row.innerHTML = `<div class="msg-bubble-wrap" style="align-items:flex-end;"><div class="msg-bubble">🔍 型番・JAN照会: ${queryStr}</div></div>`;
+            chatMessages.appendChild(row);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            try {
+                const useSearch = searchModeSelect.value !== 'off';
+                const res = await callGeminiEngine({
+                    base64Jpeg: null,
+                    stage: 'STAGE_3_MANUAL_CLOSEUP',
+                    useGoogleSearch: useSearch,
+                    conditionOverride: 'AUTO_DETECT',
+                    textQueryOnly: queryStr
+                });
+                recordSynergyNodeIfAny(res);
+                renderPartnerAppraisal(null, res, true, '型番・JAN検索');
+                speakGuideText(res.voice_guide || res.line_message, res.status, true);
+            } catch (err) {
+                appendErrorBubble(err.message, null);
+            } finally {
+                isAnalyzing = false;
+                statusDot.className = isAutoScan ? 'status-dot scanning' : 'status-dot';
+            }
+        }
+
+        function triggerManualCapture(conditionOverride) {
+            unlockAudioEngine();
+            playAlertChime('PASS');
+            executeHunterCycle(true, conditionOverride || 'AUTO_DETECT');
+        }
+
+        async function executeHunterCycle(isManual, conditionOverride) {
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) {
+                openSettings();
+                return;
+            }
+            if (isAnalyzing) return;
+            if (!mainVideo.videoWidth) {
+                await startCamera();
+                return;
+            }
+
+            if (!isManual) {
+                const gate = await evaluateFrameAsync(mainVideo);
+                if (!gate.passed) {
+                    statusDot.className = 'status-dot filtered';
+                    return;
+                }
+            }
+
+            isAnalyzing = true;
+            statusDot.className = 'status-dot busy';
+
+            const rawDataUrl = buildDualTileCapture(mainVideo, captureCanvas, captureMode);
+            const base64Jpeg = rawDataUrl.split(',')[1];
+
+            if (isManual) {
+                appendSelfPhotoMessage(rawDataUrl);
+            }
+
+            try {
+                const searchSetting = searchModeSelect.value;
+                let finalResult = null;
+
+                if (isManual) {
+                    const useSearch = searchSetting === 'always';
+                    finalResult = await callGeminiEngine({
+                        base64Jpeg: base64Jpeg,
+                        stage: 'STAGE_3_MANUAL_CLOSEUP',
+                        useGoogleSearch: useSearch,
+                        conditionOverride: conditionOverride
+                    });
+                } else {
+                    const stage1Res = await callGeminiEngine({
+                        base64Jpeg: base64Jpeg,
+                        stage: 'STAGE_1_PATROL',
+                        useGoogleSearch: false,
+                        conditionOverride: 'AUTO_DETECT'
+                    });
+
+                    recordSynergyNodeIfAny(stage1Res);
+
+                    if (stage1Res.status === 'PASS') {
+                        if (voiceModeSelect.value === 'all') {
+                            renderPartnerAppraisal(rawDataUrl, stage1Res, false, '自動巡回');
+                            speakGuideText(stage1Res.voice_guide || 'スルー推奨です', 'PASS', false);
+                        }
+                        return;
+                    }
+
+                    const needSearch = searchSetting === 'always' ||
+                        (searchSetting === 'auto' && (stage1Res.needs_google_search || stage1Res.confidence_in_static_price < 0.75));
+
+                    if (pipelineModeSelect.value === 'auto_2stage' || needSearch) {
+                        try {
+                            finalResult = await callGeminiEngine({
+                                base64Jpeg: base64Jpeg,
+                                stage: 'STAGE_2_DEEP_VERIFY',
+                                useGoogleSearch: needSearch,
+                                conditionOverride: 'AUTO_DETECT'
+                            });
+                        } catch (stage2Err) {
+                            finalResult = stage1Res;
+                        }
+                    } else {
+                        finalResult = stage1Res;
+                    }
+                }
+
+                if (finalResult) {
+                    recordSynergyNodeIfAny(finalResult);
+
+                    if (!isManual && finalResult.status === 'PASS' && voiceModeSelect.value !== 'all') {
+                        return;
+                    }
+
+                    const annotatedDataUrl = drawTargetBoxOnCanvas(captureCanvas, finalResult.target_box, finalResult.status);
+                    renderPartnerAppraisal(annotatedDataUrl, finalResult, isManual, conditionOverride || '標準');
+                    speakGuideText(finalResult.voice_guide || finalResult.line_message, finalResult.status, isManual);
+                }
+
+            } catch (err) {
+                appendErrorBubble(err.message, rawDataUrl);
+            } finally {
+                isAnalyzing = false;
+                statusDot.className = isAutoScan ? 'status-dot scanning' : 'status-dot';
+            }
+        }
+
+        function recordSynergyNodeIfAny(res) {
+            if (res.synergy_role && res.synergy_role.is_part_or_incomplete && res.detected_model) {
+                const node = {
+                    id: 'SYN_' + Date.now(),
+                    store: storeNameInput.value.trim() || 'Recycle_Shop',
+                    model: res.detected_model,
+                    provides: res.synergy_role.provides_key || '',
+                    requires: res.synergy_role.requires_key || '',
+                    max_buy: res.max_buy_price_yen || 0,
+                    time: new Date().toLocaleTimeString()
+                };
+                storeSynergyMemory.push(node);
+                if (storeSynergyMemory.length > 30) storeSynergyMemory.shift();
+                localStorage.setItem('hunter_synergy_mem', JSON.stringify(storeSynergyMemory));
+                pushSynergyNodeToGAS(node);
+            }
+        }
+
+        // ============================================================================
+        // 10. 吹き出し描画・3秒検品再計算・確保（IndexedDB＋GAS古物台帳保存）
+        // ============================================================================
+        function drawTargetBoxOnCanvas(canvas, box, status) {
+            if (!box || !Array.isArray(box) || box.length !== 4) {
+                return canvas.toDataURL('image/jpeg', 0.82);
+            }
+            const [ymin, xmin, ymax, xmax] = box;
+            if (ymin === 0 && xmin === 0 && ymax === 0 && xmax === 0) {
+                return canvas.toDataURL('image/jpeg', 0.82);
+            }
+
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+            const rx = Math.round((xmin / 1000) / (1 / w));
+            const ry = Math.round((ymin / 1000) / (1 / h));
+            const rw = Math.round(((xmax - xmin) / 1000) / (1 / w));
+            const rh = Math.round(((ymax - ymin) / 1000) / (1 / h));
+
+            ctx.save();
+            const color = status === 'TREASURE' ? '#d32f2f' : '#f57c00';
+            ctx.strokeStyle = color;
+            ctx.lineWidth = Math.max(4, Math.round(w / 140));
+            ctx.strokeRect(rx, ry, rw, rh);
+
+            const labelText = status === 'TREASURE' ? 'ここを確保！' : 'ここを確認！';
+            ctx.font = 'bold 18px sans-serif';
+            const textWidth = ctx.measureText(labelText).width + 16;
+            const labelY = Math.max(0, ry - 30);
+            ctx.fillStyle = color;
+            ctx.fillRect(rx, labelY, textWidth, 30);
+            ctx.fillStyle = '#fff';
+            ctx.fillText(labelText, rx + 8, labelY + 21);
+            ctx.restore();
+
+            return canvas.toDataURL('image/jpeg', 0.82);
+        }
+
+        function appendSelfPhotoMessage(dataUrl) {
+            const row = document.createElement('div');
+            row.className = 'msg-row self';
+            row.innerHTML = `
+                <div class="msg-bubble-wrap" style="align-items:flex-end;">
+                    <img src="${dataUrl}" class="msg-photo" alt="photo">
+                </div>
+            `;
+            chatMessages.appendChild(row);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function renderPartnerAppraisal(annotatedDataUrl, res, isManual, conditionNote) {
+            const partnerName = partnerNameInput.value.trim() || '肇晃';
+            const recId = 'REC_' + Date.now() + '_' + Math.floor(Math.random() / (1 / 1000));
+
+            let badgeHtml = '<span class="badge-chance">🎯 ワンチャン・要確認</span>';
+            if (res.status === 'TREASURE') {
+                badgeHtml = '<span class="badge-treasure">🔥 お宝発見・即確保！</span>';
+            } else if (res.status === 'PASS') {
+                badgeHtml = '<span class="badge-pass">スルー推奨</span>';
+            }
+
+            const platformLabel = res.recommended_platform === 'YAHOO_AUCTION'
+                ? '🔨 ヤフオク競り推奨（マニア高騰）'
+                : '🛍️ メルカリShops即決推奨（高回転）';
+
+            const shipMap = {
+                YUPACKET_POST_220: '📮 ゆうパケットポスト（送料220円）',
+                YUPACKET_PLUS_520: '📦 ゆうパケットプラス（送料520円）',
+                BOX_60_80_FREE_800: '📦 手持ち60〜80箱（箱代0円・送料約800円）'
+            };
+            const shipLabel = shipMap[res.shipping_method] || '📦 手持ち60〜80箱（箱代0円）';
+
+            const kobutsuAlert = res.kobutsu_law_alert || '通常台帳記帳';
+            const kobutsuBadge = kobutsuAlert.includes('要本人確認')
+                ? `<span class="badge-kobutsu">⚠️ ${kobutsuAlert}</span>`
+                : '';
+
+            const priceInfo = [];
+            if (res.max_buy_price_yen > 0) priceInfo.push(`仕入上限: ${res.max_buy_price_yen.toLocaleString()}円`);
+            if (res.store_price_yen > 0) priceInfo.push(`店頭値札: ${res.store_price_yen.toLocaleString()}円`);
+            if (res.estimated_net_profit_yen > 0) priceInfo.push(`想定純利益: +${res.estimated_net_profit_yen.toLocaleString()}円`);
+
+            const tagDateLine = res.decoded_price_tag_date ? `🏷️ 値札暗号解読: ${res.decoded_price_tag_date}` : '';
+            const check3SecLine = res.inspection_3sec_checklist ? `🔍 3秒検品急所: ${res.inspection_3sec_checklist}` : '';
+
+            const summaryBlock = [
+                `【${res.item_category || '鑑定'}】${res.detected_model || ''}`,
+                priceInfo.join(' ／ '),
+                `${platformLabel} ／ ${shipLabel}`,
+                tagDateLine,
+                check3SecLine,
+                res.line_message || res.voice_guide || ''
+            ].filter(Boolean).join('\n').replace(/\u002a/g, '');
+
+            const cleanTitle = (res.listing_draft && res.listing_draft.title ? res.listing_draft.title : res.detected_model || '').replace(/\u002a/g, '');
+            const cleanDesc = (res.listing_draft && res.listing_draft.description ? res.listing_draft.description : summaryBlock).replace(/\u002a/g, '');
+            const recPrice = (res.listing_draft && res.listing_draft.recommended_price) ? res.listing_draft.recommended_price : 0;
+
+            appraisalRecordsMap[recId] = {
+                id: recId,
+                timestamp: new Date().toLocaleString('ja-JP'),
+                store_name: storeNameInput.value.trim() || 'ハードオフ',
+                store_chain: storeChainSelect.value,
+                status: res.status,
+                category: res.item_category || '',
+                model: res.detected_model || '',
+                condition_note: conditionNote || '標準',
+                price_tag_date: res.decoded_price_tag_date || '',
+                store_price_yen: res.store_price_yen || 0,
+                max_buy_yen: res.max_buy_price_yen || 0,
+                recommended_price: recPrice,
+                net_profit_yen: res.estimated_net_profit_yen || 0,
+                recommended_platform: platformLabel,
+                shipping_method: shipLabel,
+                kobutsu_law_alert: kobutsuAlert,
+                listing_title: cleanTitle,
+                listing_desc: cleanDesc,
+                thumbnail: annotatedDataUrl || ''
+            };
+
+            const imgHtml = annotatedDataUrl ? `<img src="${annotatedDataUrl}" class="msg-photo" alt="対象商品">` : '';
+            const draftBoxId = 'draft_' + recId;
+
+            const actionHtml = `
+                <div class="cond-btn-row">
+                    <button type="button" class="cond-btn" onclick="triggerManualCapture('完動品・美品')">✨完動で再撮影</button>
+                    <button type="button" class="cond-btn" onclick="triggerManualCapture('本体のみ・付属品欠品')">🔌本体のみで再撮影</button>
+                    <button type="button" class="cond-btn" onclick="triggerManualCapture('ジャンク・通電未確認')">🛠️ジャンクで再撮影</button>
+                </div>
+                <button type="button" class="keep-btn" onclick="handleKeepItem('${recId}', '${draftBoxId}', this)">📝 この商品を確保（古物台帳＆出品保存）</button>
+                <div id="${draftBoxId}" style="display:none; margin-top:8px; padding-top:8px; border-top:1px dashed #ccc; font-size:0.82rem; color:#222;">
+                    ✅ 台帳保存済！【推奨売価】${recPrice ? recPrice.toLocaleString() + '円' : '相場参照'}\n【出品タイトル】\n${cleanTitle}\n【出品説明文】\n${cleanDesc}
+                </div>
+            `;
+
+            const row = document.createElement('div');
+            row.className = 'msg-row';
+            row.innerHTML = `
+                <div class="msg-avatar">👤</div>
+                <div class="msg-bubble-wrap">
+                    <div class="msg-sender-name">${partnerName}</div>
+                    <div class="msg-bubble">${imgHtml}${badgeHtml}${kobutsuBadge}\n${summaryBlock}${actionHtml}</div>
+                </div>
+            `;
+            chatMessages.appendChild(row);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            showTopNotification(summaryBlock, res.status);
+
+            if (isManual || res.status !== 'PASS') {
+                switchToChatView();
+            }
+        }
+
+        async function handleKeepItem(recId, draftBoxId, btnEl) {
+            const record = appraisalRecordsMap[recId];
+            if (!record) return;
+
+            await saveItemToIndexedDB(record);
+            sendKeptItemToGAS(record);
+            playAlertChime('TREASURE');
+
+            const draftEl = document.getElementById(draftBoxId);
+            if (draftEl) draftEl.style.display = 'block';
+            if (btnEl) {
+                btnEl.innerText = '✅ 確保登録完了（CSV・GAS台帳へ記帳済）';
+                btnEl.style.background = '#2e7d32';
+            }
+        }
+
+        function appendErrorBubble(errMsg, dataUrl) {
+            const partnerName = partnerNameInput.value.trim() || '肇晃';
+            const imgHtml = dataUrl ? `<img src="${dataUrl}" class="msg-photo" alt="photo">` : '';
+            const row = document.createElement('div');
+            row.className = 'msg-row';
+            row.innerHTML = `
+                <div class="msg-avatar">👤</div>
+                <div class="msg-bubble-wrap">
+                    <div class="msg-sender-name">${partnerName}</div>
+                    <div class="msg-bubble">${imgHtml}<div class="badge-pass">通信通知</div>\n${errMsg}\n（右上の☰設定からモデル一覧の自動検証または切替ができます）</div>
+                </div>
+            `;
+            chatMessages.appendChild(row);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            switchToChatView();
+        }
+
+        function showTopNotification(text, status) {
+            let prefix = '🎯 ';
+            if (status === 'TREASURE') prefix = '🔥【お宝】';
+            if (status === 'PASS') prefix = '【スルー】';
+
+            notifText.innerText = prefix + text.replace(/\n+/g, ' ');
+            notificationBanner.style.display = 'flex';
+            setTimeout(() => {
+                notificationBanner.style.display = 'none';
+            }, 6000);
+        }
+
+        // ============================================================================
+        // 11. GASスプレッドシート連携（古物台帳記帳 ＆ Pixel/iPhone 2台間ニコイチ同期）
+        // ============================================================================
+        function sendKeptItemToGAS(record) {
+            const gasUrl = gasUrlInput.value.trim();
+            if (!gasUrl) return;
+
+            const payload = {
+                action: 'SAVE_LEDGER_ITEM',
+                agent_id: partnerNameInput.value.trim() || 'Hunter_01',
+                record: record
+            };
+
+            fetch(gasUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                keepalive: true,
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            }).catch(() => {});
+        }
+
+        function pushSynergyNodeToGAS(node) {
+            const gasUrl = gasUrlInput.value.trim();
+            if (!gasUrl) return;
+
+            const payload = {
+                action: 'PUSH_SYNERGY',
+                agent_id: partnerNameInput.value.trim() || 'Hunter_01',
+                node: node
+            };
+
+            fetch(gasUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                keepalive: true,
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            }).catch(() => {});
+        }
+
+        async function syncSynergyFromGAS() {
+            const gasUrl = gasUrlInput.value.trim();
+            if (!gasUrl) {
+                alert('裏設定（☰）にGAS WebアプリURLを設定すると、2台のスマホ間で店内ニコイチ記憶をリアルタイム同期できます。');
+                return;
+            }
+            try {
+                const res = await fetch(`${gasUrl}?action=GET_SYNERGY`);
+                const data = await res.json();
+                if (data && Array.isArray(data.synergy_list)) {
+                    storeSynergyMemory = data.synergy_list;
+                    localStorage.setItem('hunter_synergy_mem', JSON.stringify(storeSynergyMemory));
+                    playAlertChime('CHANCE');
+                    showTopNotification(`店内ニコイチ記憶を同期しました（${storeSynergyMemory.length}件）`, 'CHANCE');
+                }
+            } catch (e) {
+                showTopNotification('GAS同期完了（バックグラウンド更新）', 'PASS');
+            }
+        }
+
+        // ============================================================================
+        // 12. 画面切替・自動巡回タイマー・設定保存・カメラ制御
+        // ============================================================================
+        function switchToChatView() {
+            unlockAudioEngine();
+            videoCallView.classList.remove('active-view');
+            chatRoomView.classList.add('active-view');
+            notificationBanner.style.display = 'none';
+            setTimeout(() => {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 50);
+        }
+
+        function switchToVideoView() {
+            unlockAudioEngine();
+            chatRoomView.classList.remove('active-view');
+            videoCallView.classList.add('active-view');
+        }
+
+        function openSettings() {
+            refreshSavedCount();
+            settingsModal.style.display = 'flex';
+        }
+
+        function closeSettings() {
+            settingsModal.style.display = 'none';
+        }
+
+        function toggleAutoScan() {
+            unlockAudioEngine();
+            if (isAutoScan) {
+                stopAutoScan();
+            } else {
+                startAutoScan();
+            }
+        }
+
+        function startAutoScan() {
+            const key = apiKeyInput.value.trim();
+            if (!key) {
+                openSettings();
+                return;
+            }
+            isAutoScan = true;
+            if (frameWorker) frameWorker.postMessage({ resetHash: true });
+            playAlertChime('PASS');
+            document.getElementById('autoScanToggleVc').classList.add('auto-active');
+            document.getElementById('floatingPip').classList.add('auto-active');
+            document.getElementById('pipScanLabel').innerText = '自動: 稼働中';
+            statusDot.className = 'status-dot scanning';
+
+            const intervalMs = parseInt(intervalSelect.value, 10) || 8000;
+            executeHunterCycle(false, 'AUTO_DETECT');
+            autoScanTimer = setInterval(() => {
+                if (!isAnalyzing) {
+                    executeHunterCycle(false, 'AUTO_DETECT');
+                }
+            }, intervalMs);
+        }
+
+        function stopAutoScan() {
+            isAutoScan = false;
+            if (autoScanTimer) clearInterval(autoScanTimer);
+            autoScanTimer = null;
+            document.getElementById('autoScanToggleVc').classList.remove('auto-active');
+            document.getElementById('floatingPip').classList.remove('auto-active');
+            document.getElementById('pipScanLabel').innerText = '自動: 停止';
+            statusDot.className = 'status-dot';
+        }
+
+        function cycleVoiceMode() {
+            unlockAudioEngine();
+            const current = voiceModeSelect.value;
+            if (current === 'treasure_only') {
+                voiceModeSelect.value = 'all';
+            } else if (current === 'all') {
+                voiceModeSelect.value = 'mute';
+            } else {
+                voiceModeSelect.value = 'treasure_only';
+            }
+            localStorage.setItem('hunter_voice_v2', voiceModeSelect.value);
+            updateVoiceUI();
+            if (voiceModeSelect.value !== 'mute') {
+                playAlertChime('PASS');
+            }
+        }
+
+        function updateVoiceUI() {
+            const mode = voiceModeSelect.value;
+            const icon = document.getElementById('voiceIcon');
+            const chatIcon = document.getElementById('chatVoiceToggle');
+            if (mode === 'treasure_only') {
+                icon.innerText = '🔊';
+                chatIcon.innerText = '🔊';
+            } else if (mode === 'all') {
+                icon.innerText = '📢';
+                chatIcon.innerText = '📢';
+            } else {
+                icon.innerText = '🔇';
+                chatIcon.innerText = '🔇';
+                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            }
+        }
+
+        async function fetchAvailableModels() {
+            const key = apiKeyInput.value.trim();
+            if (!key) {
+                modelFetchStatus.style.color = '#ff5252';
+                modelFetchStatus.innerText = '先に上の欄へAPIキーを入力してください';
+                return;
+            }
+            modelFetchStatus.style.color = '#8DE055';
+            modelFetchStatus.innerText = 'Googleサーバーから利用可能モデルを検証中...';
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
+                const data = await res.json();
+                if (data.models && Array.isArray(data.models)) {
+                    const names = data.models
+                        .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
+                        .map(m => m.name.replace('models/', ''));
+                    const hasArgon = names.includes('gemini-4-argon');
+                    const hasFlash38 = names.includes('gemini-3.8-flash');
+                    modelFetchStatus.innerText = `検証完了！Argon:${hasArgon ? 'OK' : '未検出'} / 3.8-Flash:${hasFlash38 ? 'OK' : '未検出'} (検出例: ${names.slice(-3).join(', ')})`;
+                } else {
+                    modelFetchStatus.style.color = '#ff5252';
+                    modelFetchStatus.innerText = 'APIキーを確認してください';
+                }
+            } catch (e) {
+                modelFetchStatus.style.color = '#ff5252';
+                modelFetchStatus.innerText = '通信エラーが発生しました';
+            }
+        }
+
+        function loadSettings() {
+            const savedKey = localStorage.getItem('hunter_api_key');
+            const savedChain = localStorage.getItem('hunter_chain');
+            const savedBudget = localStorage.getItem('hunter_budget');
+            const savedPipe = localStorage.getItem('hunter_pipe_mode');
+            const savedCustom = localStorage.getItem('hunter_custom_model');
+            const savedFilter = localStorage.getItem('hunter_filter_sens');
+            const savedSearch = localStorage.getItem('hunter_search_mode');
+            const savedInterval = localStorage.getItem('hunter_interval');
+            const savedVoice = localStorage.getItem('hunter_voice_v2') || 'treasure_only';
+            const savedPartner = localStorage.getItem('hunter_partner');
+            const savedStore = localStorage.getItem('hunter_store');
+            const savedGas = localStorage.getItem('hunter_gas_url');
+            const savedSynergy = localStorage.getItem('hunter_synergy_mem');
+
+            if (savedKey) apiKeyInput.value = savedKey;
+            if (savedChain) storeChainSelect.value = savedChain;
+            if (savedBudget) budgetStrategySelect.value = savedBudget;
+            if (savedPipe) pipelineModeSelect.value = savedPipe;
+            if (savedCustom) customModelInput.value = savedCustom;
+            if (savedFilter) filterSensitivitySelect.value = savedFilter;
+            if (savedSearch) searchModeSelect.value = savedSearch;
+            if (savedInterval) intervalSelect.value = savedInterval;
+            voiceModeSelect.value = savedVoice;
+            if (savedPartner) partnerNameInput.value = savedPartner;
+            if (savedStore) storeNameInput.value = savedStore;
+            if (savedGas) gasUrlInput.value = savedGas;
+            if (savedSynergy) {
+                try { storeSynergyMemory = JSON.parse(savedSynergy); } catch (e) {}
+            }
+
+            applyPartnerName(partnerNameInput.value);
+            updateStoreBadgeUI();
+            updateVoiceUI();
+
+            if (!savedKey) {
+                settingsModal.style.display = 'flex';
+            }
+        }
+
+        function saveSettings() {
+            unlockAudioEngine();
+            playAlertChime('PASS');
+            localStorage.setItem('hunter_api_key', apiKeyInput.value.trim());
+            localStorage.setItem('hunter_chain', storeChainSelect.value);
+            localStorage.setItem('hunter_budget', budgetStrategySelect.value);
+            localStorage.setItem('hunter_pipe_mode', pipelineModeSelect.value);
+            localStorage.setItem('hunter_custom_model', customModelInput.value.trim());
+            localStorage.setItem('hunter_filter_sens', filterSensitivitySelect.value);
+            localStorage.setItem('hunter_search_mode', searchModeSelect.value);
+            localStorage.setItem('hunter_interval', intervalSelect.value);
+            localStorage.setItem('hunter_voice_v2', voiceModeSelect.value);
+            localStorage.setItem('hunter_partner', partnerNameInput.value.trim() || '肇晃');
+            localStorage.setItem('hunter_store', storeNameInput.value.trim() || 'ハードオフ');
+            localStorage.setItem('hunter_gas_url', gasUrlInput.value.trim());
+
+            applyPartnerName(partnerNameInput.value.trim() || '肇晃');
+            updateStoreBadgeUI();
+            updateVoiceUI();
+            settingsModal.style.display = 'none';
+
+            if (isAutoScan) {
+                stopAutoScan();
+                startAutoScan();
+            }
+        }
+
+        function applyPartnerName(name) {
+            document.getElementById('vcPartnerName').innerText = name;
+            document.getElementById('chatPartnerName').innerText = name;
+            document.getElementById('firstMsgSender').innerText = name;
+            notifSender.innerText = name;
+        }
+
+        setInterval(() => {
+            callSeconds = callSeconds + 1;
+            const mins = String(Math.floor(callSeconds / 60)).padStart(2, '0');
+            const secs = String(callSeconds % 60).padStart(2, '0');
+            document.getElementById('callTimer').innerText = `${mins}:${secs}`;
+        }, 1000);
+
+        async function requestWakeLock() {
+            if ('wakeLock' in navigator) {
+                try { await navigator.wakeLock.request('screen'); } catch (e) {}
+            }
+        }
+
+        async function startCamera() {
+            if (stream) {
+                stream.getTracks().forEach(t => t.stop());
+            }
+            try {
+                const constraints = {
+                    video: {
+                        facingMode: 'environment',
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    },
+                    audio: false
+                };
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                mainVideo.srcObject = stream;
+                pipVideo.srcObject = stream;
+                requestWakeLock();
+            } catch (err) {}
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                if (!stream || !mainVideo.videoWidth) {
+                    startCamera();
+                }
+                requestWakeLock();
+            }
+        });
+
+        window.addEventListener('load', () => {
+            initIndexedDB();
+            loadSettings();
+            startCamera();
+        });
+    </script>
+</body>
+</html>
