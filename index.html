@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LINE</title>
     <style>
-        body, div, p, span, button, input, select, label, textarea, table, thead, tbody, tr, th, td, h2, strong, img, a {
+        body, div, p, span, button, input, select, label, textarea, table, thead, tbody, tr, th, td, h2, h3, strong, img, a {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
@@ -65,8 +65,8 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            padding: 14px 16px;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.65), transparent);
+            padding: 14px 16px 8px 16px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.75), transparent);
         }
         .vc-minimize-btn {
             width: 40px;
@@ -122,6 +122,27 @@
             color: #e0e0e0;
             margin-top: 2px;
             text-shadow: 0 1px 2px rgba(0,0,0,0.85);
+        }
+        .vc-focus-hud {
+            position: relative;
+            z-index: 25;
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            padding: 0 12px;
+            flex-wrap: wrap;
+        }
+        .vc-hud-select {
+            background: rgba(0,0,0,0.62);
+            color: #8DE055;
+            border: 1px solid rgba(141,224,85,0.6);
+            border-radius: 14px;
+            padding: 4px 9px;
+            font-size: 0.74rem;
+            font-weight: bold;
+            outline: none;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
         }
         .vc-pip-box {
             width: 82px;
@@ -289,16 +310,31 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            font-size: 1.0rem;
+            font-size: 0.98rem;
             font-weight: bold;
             cursor: pointer;
             padding: 8px 2px;
         }
+        .autosave-badge {
+            font-size: 0.68rem;
+            background: rgba(0,0,0,0.28);
+            color: #d0f8ce;
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 1px solid rgba(208,248,206,0.4);
+            transition: background 0.25s ease, transform 0.2s ease;
+            white-space: nowrap;
+        }
+        .autosave-badge.saving-flash {
+            background: #06C755;
+            color: #fff;
+            transform: scale(1.06);
+        }
         .chat-header-right {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 1.05rem;
+            gap: 8px;
+            font-size: 1.02rem;
         }
         .header-pill-btn {
             background: rgba(0,0,0,0.22);
@@ -479,7 +515,7 @@
             flex-shrink: 0;
         }
         .msg-bubble-wrap {
-            max-width: 83%;
+            max-width: 84%;
             display: flex;
             flex-direction: column;
         }
@@ -515,6 +551,38 @@
             border: 1px solid rgba(0,0,0,0.1);
             display: block;
             margin-bottom: 6px;
+        }
+        .spin-thumb-selector {
+            display: flex;
+            gap: 5px;
+            margin-top: 4px;
+            margin-bottom: 6px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .spin-thumb-item {
+            width: 54px;
+            height: 54px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 2px solid #ccc;
+            cursor: pointer;
+            opacity: 0.72;
+        }
+        .spin-thumb-item.active-main-photo {
+            border: 2.5px solid #06C755;
+            opacity: 1.0;
+            box-shadow: 0 0 6px rgba(6,199,85,0.6);
+        }
+        .retake-clean-btn {
+            background: #455a64;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 5px 8px;
+            font-size: 0.72rem;
+            font-weight: bold;
+            cursor: pointer;
         }
         .badge-treasure {
             display: inline-block;
@@ -553,6 +621,17 @@
             padding: 2px 7px;
             border-radius: 5px;
             font-size: 0.78rem;
+            margin-bottom: 4px;
+        }
+        .badge-corner-tag {
+            display: inline-block;
+            background: #00695c;
+            color: #fff;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-size: 0.72rem;
+            margin-left: 4px;
             margin-bottom: 4px;
         }
         .accessory-alert-box {
@@ -705,6 +784,7 @@
             border-top: 1px solid #d0d7de;
             flex-shrink: 0;
             z-index: 30;
+            align-items: center;
         }
         .stealth-pill {
             background: #fff;
@@ -718,6 +798,24 @@
             cursor: pointer;
             flex-shrink: 0;
             box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+        }
+        .stealth-select-pill {
+            background: #eef6ff;
+            color: #0d47a1;
+            border: 1.5px solid #64b5f6;
+            border-radius: 15px;
+            padding: 4px 9px;
+            font-size: 0.76rem;
+            font-weight: bold;
+            white-space: nowrap;
+            cursor: pointer;
+            flex-shrink: 0;
+            outline: none;
+        }
+        .stealth-select-pill.budget-active {
+            background: #fff8e1;
+            color: #e65100;
+            border-color: #ffb300;
         }
         .stealth-pill.active-green {
             background: #06C755;
@@ -787,7 +885,7 @@
             justify-content: center;
             flex-shrink: 0;
         }
-        #settingsModal, #stockManagerModal {
+        #settingsModal, #stockManagerModal, #priceTagCheckerModal {
             position: absolute;
             top: 0;
             left: 0;
@@ -990,7 +1088,7 @@
                 overflow: visible !important;
                 height: auto !important;
             }
-            #videoCallView, #chatRoomView, #settingsModal, #stockManagerModal {
+            #videoCallView, #chatRoomView, #settingsModal, #stockManagerModal, #priceTagCheckerModal {
                 display: none !important;
             }
             #printLedgerArea {
@@ -1004,7 +1102,8 @@
 </head>
 <body>
     <canvas id="captureCanvas"></canvas>
-    <!-- 1. ビデオ通話画面（全画面モード：📷でも🎤でも確実に撮影・連写可能） -->
+
+    <!-- 1. ビデオ通話画面（全画面モード：📷でも🎤でも確実に撮影・連写可能＋くるくる上限＆売場HUD搭載） -->
     <div id="videoCallView" class="view-panel active-view">
         <video id="mainVideo" autoplay playsinline muted></video>
         <div id="notificationBanner" onclick="switchToChatView()">
@@ -1028,10 +1127,52 @@
                 <div class="vc-barcode-tag" id="vcBarcodeIndicator">JAN検知</div>
             </div>
         </div>
+        <div class="vc-focus-hud">
+            <select id="vcCornerFocusSelect" class="vc-hud-select" onchange="syncCornerFocusMode(this.value)">
+                <option value="AUTO" selected>🤖 売場:オート見極め</option>
+                <option value="BLUE_BOX">📦 売場:青箱・コード集中</option>
+                <option value="TOOLS_PC">🔧 売場:工具・計測・基板</option>
+                <option value="AUDIO_OPT">🎸 売場:音響・光学・楽器・ゲーム</option>
+                <option value="KITCHEN_HOBBY">✒️ 売場:文具・鍋・銀・ホビー</option>
+            </select>
+            <select id="vcBudgetWheelSelect" class="vc-hud-select" onchange="syncBudgetCapWheel(this.value)">
+                <option value="0" selected>💰 上限:∞天井なし</option>
+                <option value="1000">💰 上限:1,000円</option>
+                <option value="2000">💰 上限:2,000円</option>
+                <option value="3000">💰 上限:3,000円</option>
+                <option value="4000">💰 上限:4,000円</option>
+                <option value="5000">💰 上限:5,000円</option>
+                <option value="6000">💰 上限:6,000円</option>
+                <option value="7000">💰 上限:7,000円</option>
+                <option value="8000">💰 上限:8,000円</option>
+                <option value="9000">💰 上限:9,000円</option>
+                <option value="10000">💰 上限:10,000円</option>
+                <option value="11000">💰 上限:11,000円</option>
+                <option value="12000">💰 上限:12,000円</option>
+                <option value="13000">💰 上限:13,000円</option>
+                <option value="14000">💰 上限:14,000円</option>
+                <option value="15000">💰 上限:15,000円</option>
+                <option value="16000">💰 上限:16,000円</option>
+                <option value="17000">💰 上限:17,000円</option>
+                <option value="18000">💰 上限:18,000円</option>
+                <option value="19000">💰 上限:19,000円</option>
+                <option value="20000">💰 上限:20,000円</option>
+                <option value="21000">💰 上限:21,000円</option>
+                <option value="22000">💰 上限:22,000円</option>
+                <option value="23000">💰 上限:23,000円</option>
+                <option value="24000">💰 上限:24,000円</option>
+                <option value="25000">💰 上限:25,000円</option>
+                <option value="26000">💰 上限:26,000円</option>
+                <option value="27000">💰 上限:27,000円</option>
+                <option value="28000">💰 上限:28,000円</option>
+                <option value="29000">💰 上限:29,000円</option>
+                <option value="30000">💰 上限:30,000円</option>
+            </select>
+        </div>
         <div id="videoCenterTapArea" onclick="switchToChatView()"></div>
         <div class="vc-bottom-bar">
             <div class="vc-spin-banner" id="vcSpinBannerBtn" onclick="startSpin3CaptureAppraisal()">
-                🌀 手元の商品をクルクル3連写（表➔裏➔先っぽを撮って裏鑑定へ）
+                🌀 手元の商品をクルクル3連写（ピント合焦シャッターで裏鑑定へ）
             </div>
             <div class="vc-buttons">
                 <button type="button" class="vc-btn" onclick="triggerManualCapture()" title="1枚精密撮影">🎤</button>
@@ -1045,13 +1186,15 @@
             </div>
         </div>
     </div>
-    <!-- 2. トーク画面（追尾モニター・クルクル3連写・クイックコマンド統合版） -->
+
+    <!-- 2. トーク画面（追尾モニター・クルクル3連写・くるくる金額上限・売場オート統合版） -->
     <div id="chatRoomView" class="view-panel">
         <div class="chat-header">
             <div class="chat-header-left" onclick="switchToVideoView()">
                 <span>＜</span>
                 <span id="chatPartnerName">肇晃</span>
                 <span style="font-size:0.75rem; color:#d0f8ce;">●</span>
+                <span id="autosaveStatusBadge" class="autosave-badge" title="IndexedDBリアルタイム自動保存稼働中">💾自動保存済</span>
             </div>
             <div class="chat-header-right">
                 <button type="button" class="header-pill-btn" id="chatZoomBtn" onclick="cycleCameraZoom()">1x</button>
@@ -1061,6 +1204,7 @@
                 <span onclick="openSettings()" style="cursor:pointer;">☰</span>
             </div>
         </div>
+
         <!-- Flashリアルタイム追尾モニター -->
         <div id="trackingMonitorBar">
             <img id="trackRefThumb" class="track-thumb" src="" alt="見本">
@@ -1073,30 +1217,76 @@
                 <button type="button" class="track-btn stop" onclick="stopTargetTrackingMode()">✕ 解除</button>
             </div>
         </div>
+
         <!-- クルクル3連写カウントダウン＆裏鑑定ステータスバー -->
         <div id="spinOverlayBar">📸 クルクル3連写準備中...</div>
+
         <div id="floatingPip" onclick="togglePipExpandSize()">
             <video id="pipVideo" autoplay playsinline muted></video>
             <div class="pip-badge-label" id="pipStateLabel">待機中(タップ拡大)</div>
         </div>
+
         <div id="chatMessages">
             <div class="msg-row">
                 <div class="msg-avatar">👤</div>
                 <div class="msg-bubble-wrap">
                     <div class="msg-sender-name" id="firstMsgSender">肇晃</div>
-                    <div class="msg-bubble">そっちの店の青箱や棚、どんなのある？下の「📦青箱探索」を押してかざすか、気になったら「🌀クルクル3連写」で見せて！</div>
+                    <div class="msg-bubble">そっちの店の青箱や棚、どんなのある？下のバーで「🤖売場オート」や「💰上限(くるくる1,000円刻み)」を選べるよ！気になったら「🌀クルクル3連写」で見せて！</div>
                 </div>
             </div>
         </div>
-        <!-- クイックコマンドバー（片耳イヤホン0.8秒短縮コール切替ボタン搭載） -->
+
+        <!-- クイックコマンドバー（くるくる金額上限ダイヤル・売場オート・短縮音声・値札暗号搭載） -->
         <div class="stealth-cmd-bar">
             <button type="button" class="stealth-pill" id="cmdAutoBtn" onclick="toggleAutoScan()">📦 青箱探索:OFF</button>
             <button type="button" class="stealth-pill spin-orange" onclick="startSpin3CaptureAppraisal()">🌀 クルクル3連写</button>
+            <select id="cornerFocusSelect" class="stealth-select-pill" onchange="syncCornerFocusMode(this.value)" title="売場（コーナー）自動見極め＆集中モード切替">
+                <option value="AUTO" selected>🤖 売場:オート見極め</option>
+                <option value="BLUE_BOX">📦 売場:青箱・コード集中</option>
+                <option value="TOOLS_PC">🔧 売場:工具・計測・基板</option>
+                <option value="AUDIO_OPT">🎸 売場:音響・光学・楽器・ゲーム</option>
+                <option value="KITCHEN_HOBBY">✒️ 売場:文具・鍋・銀・ホビー</option>
+            </select>
+            <select id="budgetCapWheelSelect" class="stealth-select-pill" onchange="syncBudgetCapWheel(this.value)" title="狙う仕入れ価格上限（先頭：天井なし、以降1,000円刻みくるくる）">
+                <option value="0" selected>💰 上限:∞天井なし</option>
+                <option value="1000">💰 上限:1,000円</option>
+                <option value="2000">💰 上限:2,000円</option>
+                <option value="3000">💰 上限:3,000円</option>
+                <option value="4000">💰 上限:4,000円</option>
+                <option value="5000">💰 上限:5,000円</option>
+                <option value="6000">💰 上限:6,000円</option>
+                <option value="7000">💰 上限:7,000円</option>
+                <option value="8000">💰 上限:8,000円</option>
+                <option value="9000">💰 上限:9,000円</option>
+                <option value="10000">💰 上限:10,000円</option>
+                <option value="11000">💰 上限:11,000円</option>
+                <option value="12000">💰 上限:12,000円</option>
+                <option value="13000">💰 上限:13,000円</option>
+                <option value="14000">💰 上限:14,000円</option>
+                <option value="15000">💰 上限:15,000円</option>
+                <option value="16000">💰 上限:16,000円</option>
+                <option value="17000">💰 上限:17,000円</option>
+                <option value="18000">💰 上限:18,000円</option>
+                <option value="19000">💰 上限:19,000円</option>
+                <option value="20000">💰 上限:20,000円</option>
+                <option value="21000">💰 上限:21,000円</option>
+                <option value="22000">💰 上限:22,000円</option>
+                <option value="23000">💰 上限:23,000円</option>
+                <option value="24000">💰 上限:24,000円</option>
+                <option value="25000">💰 上限:25,000円</option>
+                <option value="26000">💰 上限:26,000円</option>
+                <option value="27000">💰 上限:27,000円</option>
+                <option value="28000">💰 上限:28,000円</option>
+                <option value="29000">💰 上限:29,000円</option>
+                <option value="30000">💰 上限:30,000円</option>
+            </select>
             <button type="button" class="stealth-pill" id="cmdShortVoiceBtn" onclick="toggleShortCallsignMode()">⚡ 短縮音声:OFF</button>
+            <button type="button" class="stealth-pill" onclick="openPriceTagCheckerModal()">🏷 値札暗号</button>
             <button type="button" class="stealth-pill" id="cmdExpandPipBtn" onclick="togglePipExpandSize()">🔍 小窓拡大</button>
             <button type="button" class="stealth-pill" onclick="openStockManagerModal()">🏆 確保リスト</button>
             <button type="button" class="stealth-pill" onclick="clearChatHistoryConfirm()">🗑 履歴クリア</button>
         </div>
+
         <div class="chat-bottom-bar">
             <button type="button" class="chat-icon-btn" onclick="switchToVideoView()" title="全画面カメラへ">🎥</button>
             <button type="button" class="chat-icon-btn" onclick="triggerManualCapture()" title="1枚精密撮影">📷</button>
@@ -1104,17 +1294,18 @@
             <button type="button" class="chat-send-btn" onclick="triggerManualCapture()" title="1枚精密撮影">▶</button>
         </div>
     </div>
+
     <!-- 3. システム設定モーダル -->
     <div id="settingsModal">
         <div class="settings-card">
             <div class="settings-title">
-                <span>ハンター司令塔設定（全17領域＆Bluetooth無音防止統合版）</span>
+                <span>ハンター司令塔設定（全17領域＆売場オート＆キャッシュ最適化版）</span>
                 <span style="font-size:0.73rem; color:#aaa; cursor:pointer;" onclick="clearSynergyMemory()">[店内記憶リセット]</span>
             </div>
             <button type="button" class="stock-open-btn" onclick="openStockManagerModal()">📦 確保ストック一覧・出品CSV/ZIP出力・古物台帳を開く</button>
             <button type="button" class="sound-test-btn" onclick="runSoundAndVoiceTest()">🔊 音と声のテスト（Bluetoothイヤホン確認）</button>
             <div class="cache-audit-bar" id="cacheAuditText">
-                暗黙的キャッシュ監査：待機中（全17領域・高利益18ジャンル拡張辞書搭載済）
+                暗黙的キャッシュ監査：待機中（全17領域・水増しゼロ純粋辞書・90〜95%割引対応）
             </div>
             <div class="cache-audit-bar" id="cameraCapAuditText" style="color:#29b6f6;">
                 カメラ制御＆EAN-13バーコード検出：初期化待機中（768px・1タイル最適化）
@@ -1191,11 +1382,12 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>通話相手の表示名 ／ 現在の店舗名（台帳・メモ連動）</label>
-                <div style="display:flex; gap:6px;">
-                    <input type="text" id="partnerNameInput" value="肇晃" style="width:38%;" placeholder="表示名">
-                    <input type="text" id="storeNameInput" value="ハードオフ・セカスト" style="width:62%;" placeholder="現在の店舗名">
+                <label>通話相手の表示名 ／ 現在の店舗名・所在地（古物台帳連動）</label>
+                <div style="display:flex; gap:6px; margin-bottom:5px;">
+                    <input type="text" id="partnerNameInput" value="肇晃" style="width:35%;" placeholder="表示名">
+                    <input type="text" id="storeNameInput" value="ハードオフ・セカスト" style="width:65%;" placeholder="現在の店舗名">
                 </div>
+                <input type="text" id="storeAddressInput" value="長野県内（領収書記載所在地）" placeholder="店舗所在地（例：長野県佐久市・上田市・小諸市など台帳記載用）">
             </div>
             <div id="corporateSettingsBlock" style="display:none; border-top:1px dashed #444; padding-top:8px; margin-top:6px;">
                 <div class="form-group">
@@ -1215,6 +1407,7 @@
             <button type="button" class="settings-save-btn" onclick="saveSettings()">保存してハンティング開始</button>
         </div>
     </div>
+
     <!-- 4. 確保ストック管理・古物台帳様式15号・CSV/ZIP一括出力モーダル -->
     <div id="stockManagerModal">
         <div class="manager-card">
@@ -1229,7 +1422,7 @@
                 <span>目標60,500円まで: あと60,500円</span>
             </div>
             <div class="export-btn-grid">
-                <button type="button" class="export-btn blue" onclick="downloadAuctownZipPackage()">📦 オークタウン用ZIP出力（CSV＋赤枠なし画像同梱）</button>
+                <button type="button" class="export-btn blue" onclick="downloadAuctownZipPackage()">📦 オークタウン用ZIP出力（CSV＋連写画像全同梱）</button>
                 <button type="button" class="export-btn" onclick="downloadMercariShopsCsv()">📄 メルカリShops一括登録CSV出力（中古電池自動除外）</button>
                 <button type="button" class="export-btn purple" onclick="downloadKobutsuLedgerCsv()">📒 古物台帳CSV出力（別記様式第15号・7年保存用）</button>
                 <button type="button" class="export-btn orange" onclick="printKobutsuLedgerA4()">🖨️ 警察立入検査用・様式15号をA4横で即時印刷</button>
@@ -1262,7 +1455,32 @@
             </div>
         </div>
     </div>
-    <!-- 5. 長野県警・所轄警察署立入検査対応：別記様式第15号 A4横即時プリントアウト専用領域 -->
+
+    <!-- 5. 🏷 値札暗号・セカスト6桁逆読み・滞留日数ワンタップ計算モーダル -->
+    <div id="priceTagCheckerModal">
+        <div class="settings-card">
+            <div class="settings-title">
+                <span>🏷 4大チェーン値札暗号 ＆ 滞留日数チェッカー</span>
+                <button type="button" class="header-pill-btn" onclick="closePriceTagCheckerModal()">✕ 閉じる</button>
+            </div>
+            <div class="form-group">
+                <label>セカンドストリート：値札下部の「6桁数字」を入力（右から左へ逆読み自動変換）</label>
+                <input type="text" id="secstCodeInput" maxlength="6" inputmode="numeric" placeholder="例：150826（2026年8月15日入荷）" oninput="evaluateSecstPriceTagCode()">
+                <div id="secstDecodeResult" style="margin-top:6px; padding:8px; background:#111; border-radius:7px; border:1px solid #333; font-size:0.84rem; color:#8DE055;">
+                    6桁の数字を入力すると、入荷日と滞留日数を即座に計算します。また値札の「管理」欄に番号があればバックヤードに箱や付属品があります！
+                </div>
+            </div>
+            <div class="form-group" style="background:#252525; padding:10px; border-radius:8px; font-size:0.78rem; line-height:1.5;">
+                <strong style="color:#ffb300;">📌 ブックオフ・ハードオフ値札の即断カンニング表</strong><br>
+                ・<strong>ブックオフ枠色</strong>：黒(1〜3月) ／ 緑(4〜6月) ／ 青(7〜9月) ／ 赤(10〜12月)<br>
+                ・<strong>ブックオフ内部記号</strong>：「●」「〇」「YO」「★」「V4/V3」は高回転お宝候補！「YX」「C」「D」は即スルー確定。<br>
+                ・<strong>ハードオフ小槌シール</strong>：相場未確認の一律ジャンク値付けのため超お宝の宝庫！上下2段日付は「上段＝販売開始日、下段＝値下げ日」。
+            </div>
+            <button type="button" class="settings-save-btn" onclick="closePriceTagCheckerModal()">閉じてハンティングへ戻る</button>
+        </div>
+    </div>
+
+    <!-- 6. 長野県警・所轄警察署立入検査対応：別記様式第15号 A4横即時プリントアウト専用領域 -->
     <div id="printLedgerArea">
         <h2 style="font-size:14pt; margin-bottom:4px;">古物台帳（古物営業法施行規則第17条 別記様式第15号準拠・インボイス古物商特例7年保存帳簿）</h2>
         <div id="printMetaHeader" style="font-size:9pt; margin-bottom:8px;"></div>
@@ -1286,6 +1504,7 @@
             <tbody id="printKobutsuTableBody"></tbody>
         </table>
     </div>
+
     <script>
         // ============================================================================
         // 0. 数値積算・除算ヘルパー関数（アスタリスク記号を一切使用しない安全演算）
@@ -1298,22 +1517,38 @@
             if (b === 0) return 0;
             return a / b;
         }
+
         // ============================================================================
-        // 1. 暗黙的キャッシュ発動用・全17領域（Deep Research 18ジャンル統合）マスター辞書
+        // 1. 暗黙的キャッシュ（90〜95%割引）発動用・全17領域＆売場4ゾーン自動見極めマスター辞書
         // ============================================================================
         const CORE_MASTER_KB = `
 [SYSTEM_STATIC_PREFIX_START: DO_NOT_INSERT_DYNAMIC_VARIABLES_ABOVE_THIS_LINE]
 # 役割と至上命令
 あなたは地方および郊外のリサイクルショップ（ハードオフ、オフハウス、セカンドストリート、ブックオフ、サンタの倉庫、ローカル総合リユース店等）の店頭カメラ映像から、「店舗の値付けミス（価格の歪み）」「高利益の隠れジャンクパーツ」「店内別売り品のニコイチ（セット化）機会」をリアルタイムに特定する世界最高峰の鑑定・司令塔エンジンである。
 現場でスマートフォンやタブレットを持って歩いている操作者は、専門知識を持たない初心者である。したがって、内部推論はプロバイヤー以上の極限の専門性で行いつつ、操作者へ出力する音声メッセージ（voice_guide）とトーク画面メッセージ（line_message）は「専門用語を1つも使わない日常の言葉（時計の針の方向・色・形・目立つ文字・簡単な手の動き）」に完全変換しなければならない。記号のアスタリスクは出力内に一切使用してはならない。
+
+# 売場（コーナー）自動見極め（AUTO_CORNER）と視覚アテンション集中ルール
+入力コンテキストの corner_focus_mode が "AUTO" の場合、あなたはまず画像全体の背景・棚・容器（青いプラスチックカゴ、ビニール袋の束、工具棚、ガラスケース、オーディオラック、キッチン棚、文具トレイ等）から現在いる売場を以下の4ゾーンのいずれかに自動判別し、該当ゾーンの領域に視覚アテンションを100%集中させて微細な特徴を掘り出せ（無関係な他ゾーンへの注意分散を厳禁とする）。
+- ゾーン1 [BLUE_BOX]（青箱・ジャンク小箱・袋詰めコード売場）：領域3（特殊ACアダプター・専用電源）、領域4（純正リモコン）、領域7（レトロゲームD端子ケーブル・周辺機器）、領域15（6N/7N/8N高純度ケーブル・OYAIDE・BELDEN・Apple変換A1463・FA通信ケーブル・無線ケーブル）、領域16（トーンアーム純正サブウェイト・セラミックヘッドシェル・カセット消磁器・単体露出計・アングルファインダー・金属フード）に集中せよ。
+- ゾーン2 [TOOLS_PC]（工具・計測器・PCパーツ・産業基板売場）：領域1（マキタ・HiKOKI純正バッテリー＆充電器・電動工具）、領域2（Adaptec SCSIカード・3dfx・Sound Blaster・PC-98拡張ボード・PT3）、領域9（KEYENCEセンサー・HIOKI・FLUKE・ミツトヨ精密測定器）、領域12（Snap-on・KTCネプロス・PB Swiss Tools）、領域17のうち計測プローブ（Tektronix・FLUKE・HIOKI）とマルチメーターに集中せよ。
+- ゾーン3 [AUDIO_OPT]（オーディオ・カメラ光学・楽器エフェクター・旧車パーツ売場）：領域5（メタルカセットテープ・MCカートリッジ・アマチュア無線機）、領域6（オールドレンズ・アトムレンズ・富岡光学）、領域8（BOSS銀ネジ黒ラベル・ヴィンテージエフェクター・シンセROMカード）、領域11（NARDI・MOMOステアリング・旧車1DIN/2DINカーオーディオ・据置スピーカー）に集中せよ。
+- ゾーン4 [KITCHEN_HOBBY]（キッチン・食器・文房具・おもちゃ・アウトドア売場）：領域10（コールマン2レバー・ランタン・純銀SILVER925/950カトラリー・アムウェイ・ビタクラフト・ストウブ）、領域13（ロットリング旧型・ぺんてるメカニカ/PG系・14K/18K/21K万年筆）、領域14（廃番プラレール・ヴィンテージ超合金パーツ）、領域17のうち業務用調理器具（GLOBAL-PRO・Misono UX10・グレステン）、廃番一体型万年筆（PILOT MYU・トンボSH-1500LP）、旧620ベアリング、Snow Peak銅ヘッドハンマーに集中せよ。
+なお、corner_focus_mode に特定ゾーンが明示指定されている場合は、その指定ゾーンに100%集中せよ。
+
+# くるくる金額上限（budget_cap_yen）厳守ルール
+入力コンテキストの budget_cap_yen が 0 より大きい数値（例：1000、2000、3000等）である場合、操作者は「その金額以下で買える商品」だけを狙っている。
+1. 店頭の値札（store_price_yen）が budget_cap_yen を超えている商品は、たとえ利益が出る商品であっても status を "PASS" とし、line_message に「設定上限（○○円）を超えているためスルー」と明記せよ。
+2. 値札が見えない場合は、仕入れ上限額（max_buy_price_yen）またはその売場の一般的なジャンク価格が budget_cap_yen 以内に収まり、かつ確定純利益1,500円以上が見込めるお宝候補を優先してピックアップせよ。
+3. budget_cap_yen が 0 の場合は「天井なし（無制限）」として全価格帯のお宝を狙え。
+
 # 厳守すべき出力JSON形式とスキャンステージ別の判定基準
 応答は必ず以下のキーを持つ純粋なJSONオブジェクトのみを出力せよ。
 - status: "TREASURE" | "CHANCE" | "PASS"
-  ・"TREASURE": 手数料(10%)と送料を差し引いた確定純利益（または高確率の想定純利益）が1,500円〜2,000円以上見込める場合、または店内保持リスト（synergy_memory）の片割れ品と合体して純利益3,000円以上が確定した場合。
+  ・"TREASURE": 手数料(10%)とサイズ別送料（小型ネコポス210円・中型520円・大型750円）を差し引いた確定純利益が1,500円〜2,000円以上見込める場合、または店内保持リスト（synergy_memory）の片割れ品と合体して純利益3,000円以上が確定した場合。
   ・"CHANCE": 遠目（STAGE_1_PATROL）で高利益商材の決定的な視覚トリガー（太いコード・金属端子・銀ネジ・ロゴ形状・値札の特命記号等）を捉えたが、手に取ってクルクル3連写（表・裏・先端）での確認が必要な場合。
-  ・"PASS": 利益が出ない一般家電、単なる細いACコード・一般的なメガネ電源コード・標準赤白黄RCAケーブル、相場通りの適正価格品、ブックオフのYX/C/D記号品、または修復不能な品・非純正互換品である場合。
+  ・"PASS": 利益が出ない一般家電、単なる細いACコード・一般的なメガネ電源コード・標準赤白黄RCAケーブル、相場通りの適正価格品、設定した金額上限（budget_cap_yen）を超える値札の商品、ブックオフのYX/C/D記号品、または修復不能な品・非純正互換品である場合。
   ・【最重要ルール】scan_stage が "STAGE_3_SPIN_3FRAMES"（クルクル3連写）または "STAGE_3_MANUAL_CLOSEUP" の時は、すでに操作者が商品を手に取って見えているすべての角度（表・裏文字・先端・値札）を撮影している。したがって「もう一度見せてくれ」と先延ばしにする "CHANCE" の出力は原則禁止とし、見えている特徴から必ず "TREASURE"（お宝確定・仕入上限額明示）または "PASS"（スルー確定）のどちらかに最終決着をつけよ。
-- item_category: 特定した17領域のカテゴリ名
+- item_category: 特定した17領域のカテゴリ名（先頭に判別した売場ゾーン名 [青箱] [工具] [音響光学] [文具鍋ホビー] 等を付記してもよい）
 - detected_model: 推定または確定したメーカー・品名・型番
 - visual_cue_matched: 合致した視覚特徴（例：青い輪ゴムの茶褐色半透明コード、マキタ雪マーク＋白封印キャップ、Apple A1463角型9ピン等。追尾時に見分けられるよう輪ゴムや袋の色も必ず含めよ）
 - detected_serial_or_feature: 画像から読み取れたシリアルナンバー（製造番号）、ロット刻印、色、傷などの個体識別特徴
@@ -1321,7 +1556,7 @@
 - pse_and_shipping_type: "STANDARD_NO_BATTERY" | "LITHIUM_BATTERY_LAND_ONLY" | "PSE_AC_ADAPTER" | "CAMP_STOVE_FUEL_DRAINED"
 - max_buy_price_yen: この金額（税込）以下で売られていれば即確保すべき仕入れ上限額（整数）
 - store_price_yen: 値札が見えている場合の店頭税込価格（見えない場合は0）
-- estimated_net_profit_yen: 手数料・送料控除後の想定純利益（整数）
+- estimated_net_profit_yen: 手数料・サイズ別送料控除後の想定純利益（整数）
 - confidence_in_static_price: 静的辞書による相場確信度（0.0〜1.0）
 - needs_google_search: 辞書外の未知型番や相場変動が激しい高額品でGoogle検索裏付けが必要な場合 true、定番品は false
 - target_box: 画像内で手に取るべき対象物の座標 [ymin, xmin, ymax, xmax]（0〜1000の整数正規化座標、該当なしは [0,0,0,0]）
@@ -1329,94 +1564,112 @@
 - voice_guide: 小学生でも0.5秒で動ける「時計の針の方向・輪ゴムや袋の色・形」による短い音声指示（専門用語厳禁）
 - line_message: LINEトーク画面に表示する分かりやすい解説・仕入れ判断基準・値札解読結果
 - listing_draft: { title: "65文字以内の即売れ出品タイトル（メーカー名・品名・型番を半角スペース区切り）", description: "検品結果と特徴を反映した出品説明文（店舗独自ランク表記禁止）", recommended_price: 整数 }
+
 # 全17領域・視覚トリガー＆真贋・仕入れ上限マスター辞書
 ## 領域1：電動工具・プロ機材（マキタ・HiKOKI・Panasonic・MAX）
 - マキタ純正リチウムイオンバッテリー：BL1860B(18V 6.0Ah 108Wh: 実売8,500〜11,000円 / 仕入上限4,500円)、BL1850B(18V 5.0Ah: 実売6,500〜8,000円 / 上限3,300円)、BL1830B(18V 3.0Ah: 実売4,500〜5,500円 / 上限2,200円)、BL1460B(14.4V 6.0Ah: 実売7,000〜8,500円 / 上限3,300円)、BL4025/BL4040/BL4050F(40Vmaxシリーズ: 実売9,500〜16,000円 / 上限5,500円)。
 - マキタ真贋判定の絶対急所：(1)底面ラベルに「雪の結晶マーク（急速充電対応）」と飛行機マーク、およびPSEマークの近くに届出事業者名があるか。(2)裏面4隅のT10トルクスネジ穴のうち1箇所だけに「白い樹脂製の封印キャップ（分解防止プラグ）」が埋まっているか。(3)白い着脱ボタン（ラッチ）を押し下げた奥に赤いシールが見えるか。(4)端子が銀色で波打っているもの、ネジが4本ともむき出しのプラスネジである個体、またはLXTロゴの書体が崩れている個体は100%非純正互換品のため即座に PASS とせよ。なお、中古バッテリー単体はメルカリShopsでは出品対象外のため、自動的にヤフオク（カテゴリ2084258411）専用かつヤマト陸送（pse_and_shipping_type: "LITHIUM_BATTERY_LAND_ONLY"）として判定せよ。
 - 充電器・工具本体：マキタ急速充電器 DC18RF / DC18RC(実売3,800〜5,500円 / 上限1,650円)、2口充電器 DC18RD(実売8,500円 / 上限3,800円)。HiKOKI マルチボルト蓄電池 BSL36A18 / BSL36B18 / BSL36A18X(実売7,500〜11,000円 / 上限3,800円)。本体のみのジャンクインパクトドライバ（TD171D / TD172D / TD173D / WH36DC）は単体上限3,300円、店内のバッテリーとニコイチ合体時は上限7,500円。
+
 ## 領域2：PCパーツ・産業用インターフェース・レトロ基板
-- 産業用・工場保守用拡張カード：Adaptec製SCSIホストアダプタ（AHA-2940UW / AHA-2940U2W / ASC-29160 / AHA-1542CF 等: 実売5,000〜22,000円 / 上限1,650円）。視覚トリガーは基板端の50ピンまたは68ピンの高密度金属D-SubコネクタとAdaptecロゴ入り正方形チップ。
-- レトロGPU・サウンドカード・マザーボード：3dfx Voodoo / Voodoo2 / Voodoo3、Creative Sound Blaster AWE32 / AWE64 Gold（金メッキRCA端子とSIMMソケット搭載ISA基板: 実売8,000〜25,000円 / 上限2,200円）、NEC PC-9801用Cバス拡張ボード（PC-9801-86 / PC-9801-26K: 実売12,000〜35,000円 / 上限3,300円）、アースソフト PT3（TVチューナーカード: 実売15,000〜25,000円）。
+- 産業用・工場保守用拡張カード：Adaptec製SCSIホストアダプタ（AHA-2940UW / AHA-2940U2W / ASC-29160 / ASC-29320 / AHA-1542CF / AVA-2904 等: 実売5,000〜22,000円 / 上限1,650円）。視覚トリガーは基板端の50ピンまたは68ピンの高密度金属D-SubコネクタとAdaptecロゴ入り正方形チップ。
+- レトロGPU・サウンドカード・マザーボード：3dfx Voodoo / Voodoo2 / Voodoo3、Creative Sound Blaster AWE32 / AWE64 Gold（金メッキRCA端子とSIMMソケット搭載ISA基板: 実売8,000〜25,000円 / 上限2,200円）、NEC PC-9801用Cバス拡張ボード（PC-9801-86 / PC-9801-26K / PC-9801-118: 実売12,000〜35,000円 / 上限3,300円）、アースソフト PT2 / PT3（TVチューナーカード: 実売15,000〜25,000円 / 上限4,400円）。
+
 ## 領域3：特殊ACアダプター・専用電源ユニット（青カゴ110円〜550円の宝庫）
-- 楽器・シンセ用純正電源：Roland ACI-100 / PSB-1U / PSB-100 / ACB-120、KORG KA161 / KA181（先端が丸型4ピン〜8ピンの金属DINコネクタ: 実売3,500〜9,500円 / 上限880円）、Yamaha PA-6 / PA-5B、BOSS ACA-100G / PSA-100S。
-- 業務用・高出力アダプター：OUTPUT欄に「AC ~（交流出力・波線マーク）」があるAC-ACアダプター（実売4,000〜12,000円 / 上限1,100円）、出力電圧24V/36V/48V/±15Vの特殊規格品、19.5V 150W〜330Wの大型ゲーミングPC用薄型ACアダプター（Dell, ASUS ROG, Razer, HP, NEC, Lenovo, 富士通, 東芝, ソニー: 実売4,500〜9,000円 / 上限1,650円）。
+- 楽器・シンセ用純正電源：Roland ACI-100 / PSB-1U / PSB-100 / ACB-120 / BOSS PSA-100G / ACA-100G、KORG KA161 / KA181 / KA163（先端が丸型4ピン〜8ピンの金属DINコネクタ: 実売3,500〜9,500円 / 上限880円）、Yamaha PA-6 / PA-5B / PA-5C / PA-300。
+- 業務用・高出力アダプター：OUTPUT欄に「AC ~（交流出力・波線マーク）」があるAC-ACアダプター（実売4,000〜12,000円 / 上限1,100円）、出力電圧24V/36V/48V/±15Vの特殊規格品、19.5V 150W〜330Wの大型ゲーミングPC用薄型ACアダプター（Dell Alienware, ASUS ROG, Razer, HP OMEN, NEC, Lenovo Legion, 富士通, 東芝, ソニー: 実売4,500〜9,000円 / 上限1,650円）。
+
 ## 領域4：純正リモコン（AVアンプ・LD・業務用空調・給湯器）
 - AV純正リモコン：Pioneer LDプレーヤー用（CU-CLD016 / CU-CLD100 / CU-DV012等: 実売3,000〜8,500円 / 上限550円）、Sony AVアンプ・MD・DAT用（RM-J701 / RM-D系 / 双方向液晶 RM-LJ304等: 実売2,800〜7,500円 / 上限550円）、Bose Wave Music System用純正リモコン（上限880円）、Panasonic / 東芝 / Sony ブルーレイレコーダー純正リモコン（上限550円）。
-- 業務用・住設リモコン：ダイキン・三菱・日立の業務用エアコンワイヤードリモコン（BRC1E3 / PAR-21MA等: 実売3,500〜9,000円 / 上限880円）、給湯器・暖房機用リモコン。
+- 業務用・住設リモコン：ダイキン・三菱・日立の業務用エアコンワイヤードリモコン（BRC1E3 / BRC1G1 / PAR-21MA / PAR-40MA等: 実売3,500〜9,000円 / 上限880円）、リンナイ・ノーリツ給湯器マルチリモコン（上限880円）。
+
 ## 領域5：オーディオ・無線機・レコード＆カセット周辺
-- メタルカセットテープ：TDK MA-R / MA-XG（白いセラミックやアルミダイキャスト金属フレーム: 中古でも実売8,000〜25,000円、未開封30,000〜60,000円 / 上限5,500円）、Sony Metal Master、Maxell Metal Vertex、背表紙に「TYPE IV (METAL)」表記があるカセット全般。
+- メタルカセットテープ：TDK MA-R / MA-XG（白いセラミックやアルミダイキャスト金属フレーム: 中古でも実売8,000〜25,000円、未開封30,000〜60,000円 / 上限5,500円）、Sony Metal Master、Maxell Metal Vertex、背表紙に「TYPE IV (METAL)」表記があるカセット全般（上限1,650円）。
 - レコードカートリッジ＆ヘッドシェル：Denon DL-103 / DL-103R（黒い四角いMC型カートリッジ代表格: 実売14,000〜22,000円 / 上限5,500円）、Ortofon SPU / Concorde、Shure V15 Type III / IV / M44G、Audio-Technica AT-33E / AT-15Ea、Technics純正アルミヘッドシェル（上限1,100円）。
-- アマチュア無線周辺：YAESU・ICOM・KENWOODのスタンドマイク（MD-1 / MD-100 / SM-20 / MC-60等: 実売6,000〜16,000円 / 上限2,200円）、SWRパワー計（SX-200 / SX-600等）、安定化電源（DM-330MV等）。
+- アマチュア無線周辺：YAESU・ICOM・KENWOODのスタンドマイク（MD-1 / MD-100 / SM-20 / MC-60 / MC-80等: 実売6,000〜16,000円 / 上限2,200円）、第一電波工業（DIAMOND）SWRパワー計（SX-200 / SX-400 / SX-600 / SX-1000等）、ALINCO安定化電源（DM-330MV等）。
+
 ## 領域6：カメラ光学部品・オールドレンズ・純正アクセサリー
-- アトムレンズ・初期玉・富岡光学：Asahi Pentax Super-Takumar 50mm F1.4（距離リング無限遠「∞」のすぐ右に赤い「R」縦線が食い込んでいる初期型8枚玉は実売25,000〜45,000円、後期型も8,000〜14,000円 / 上限5,500円）、Auto Yashinon-DX 50mm F1.4（富岡光学）、Canon FD 55mm F1.2 S.S.C.、Nikkor-S Auto 50mm F1.4 / 55mm F1.2、Minolta MC/MD ROKKOR 58mm F1.2、Olympus Zuiko、Leica、Contax、Mamiya。
+- アトムレンズ・初期玉・富岡光学：Asahi Pentax Super-Takumar 50mm F1.4（距離リング無限遠「∞」のすぐ右に赤い「R」縦線が食い込んでいる初期型8枚玉は実売25,000〜45,000円、後期型も8,000〜14,000円 / 上限5,500円）、Super-Takumar 55mm F1.8、Auto Yashinon-DX 50mm F1.4（富岡光学）、Canon FD 55mm F1.2 S.S.C.、Nikkor-S Auto 50mm F1.4 / 55mm F1.2、Minolta MC/MD ROKKOR 58mm F1.2、Olympus OM G.Zuiko、Leica、Contax Carl Zeiss、Mamiya Sekor。
+
 ## 領域7：レトロゲーム周辺機器・非標準ケーブル・拡張パーツ
-- 高額ケーブル・周辺機器：ニンテンドーゲームキューブ専用D端子ビデオケーブル（DOL-009: 片方が金属製台形D端子、実売12,000〜18,000円 / 上限4,400円）、ウェーブバードワイヤレスコントローラー（DOL-004）、ドリームキャストVGAボックス（HKT-8100: 実売8,000〜14,000円 / 上限2,200円）、セガサターン拡張RAMカートリッジ4MB（HSS-0150: 実売4,500〜7,500円 / 上限1,650円）、PCエンジン アーケードカードPRO/DUO、メガドライブ6Bパッド。
+- 高額ケーブル・周辺機器：ニンテンドーゲームキューブ専用D端子ビデオケーブル（DOL-009: 片方が金属製台形D端子、実売12,000〜18,000円 / 上限4,400円）、ゲームキューブコンポーネントケーブル（DOL-010）、ウェーブバードワイヤレスコントローラー（DOL-004: レシーバーDOL-005付は実売8,500〜13,000円 / 上限3,300円）、ドリームキャストVGAボックス（HKT-8100: 実売8,000〜14,000円 / 上限2,200円）、セガサターン拡張RAMカートリッジ4MB（HSS-0150: 実売4,500〜7,500円 / 上限1,650円）、PCエンジン アーケードカードPRO/DUO、メガドライブ6Bパッド。
+
 ## 領域8：楽器周辺機器・ヴィンテージエフェクター・音源モジュール
-- BOSS初期個体：電池蓋の手回しネジが「銀ネジ（1977〜1981年）」および底面「黒ラベル（MADE IN JAPAN）」の OD-1（実売25,000〜60,000円）、CE-2（18,000〜35,000円）、DM-2（22,000〜40,000円）、DS-1、PH-1、VB-2（ジャンクでも上限5,500〜8,800円で即確保）。
-- 定番名機＆カード：Ibanez TS9 / TS808、ProCo RAT2（USA刻印・フラット底面）、BELDEN 8412 / 9395 シールド（Switchcraftプラグ付）、シンセ用ROM/RAMカード（Roland M-256E/M-512E、Yamaha MCD64、KORG MCR-03: 薄いカード1枚で実売4,500〜12,000円 / 上限1,100円）。
+- BOSS初期個体：電池蓋の手回しネジが「銀ネジ（1977〜1981年）」および底面「黒ラベル（MADE IN JAPAN）」の OD-1（実売25,000〜60,000円）、CE-2（18,000〜35,000円）、DM-2（22,000〜40,000円）、DS-1、PH-1、VB-2、BF-2（ジャンクでも上限5,500〜8,800円で即確保）。
+- 定番名機＆カード：Ibanez TS9 / TS808（JRC4558D艶ありオペアンプ搭載個体）、ProCo RAT / RAT2（USA刻印・フラット底面・LM308N搭載）、BELDEN 8412 / 9395 シールド（Switchcraftプラグ付）、シンセ用ROM/RAMカード（Roland M-256E/M-512E/PN-D50、Yamaha MCD64/SYemb、KORG MCR-03/MPC: 薄いカード1枚で実売4,500〜12,000円 / 上限1,100円）。
+
 ## 領域9：業務用測定器・店舗用品・ミツトヨ精密測定工具
-- 電気測定器・センサー：KEYENCE 光電・ファイバー・レーザーセンサー（FS-V31 / LV-N11等: 実売4,000〜25,000円 / 上限2,200円）、HIOKI クランプメーター・絶縁抵抗計（3280-10F / IR4051等: 上限2,200円）、FLUKE マルチメーター（87V / 117 / 179等: 実売8,000〜25,000円）、A&D電子天びん、東芝テック/スター精密レジ・レシートプリンター。
-- ミツトヨ（Mitutoyo）デジタルノギス・マイクロメーター（CD-15AX / CD-60C / MDC-25MJ / MDC-25MX / サーフテストSJ-201等: 実売6,000〜40,000円 / 上限3,300円）：裏面の深さゲージ溝の終端がエンドミル切削による「丸み（R形状）」になっているか確認せよ（斜めのスロープ状は非純正のためPASS）。
+- 電気測定器・センサー：KEYENCE 光電・ファイバー・レーザーセンサー（FS-V31 / FS-N11N / LV-N11N / LR-Z等: 実売4,000〜25,000円 / 上限2,200円）、HIOKI クランプメーター・絶縁抵抗計（3280-10F / 3288 / IR4051 / IR4052等: 上限2,200円）、FLUKE マルチメーター（87V / 115 / 117 / 179等: 実売8,000〜25,000円）、A&D電子天びん、東芝テック/スター精密mPOPレジ・Bluetoothレシートプリンター（SM-S210i / TSP650II等）。
+- ミツトヨ（Mitutoyo）デジタルノギス・マイクロメーター（CD-15AX / CD-15CPX / CD-20AX / CD-60C / MDC-25MJ / MDC-25MX / サーフテストSJ-201 / SJ-301等: 実売6,000〜40,000円 / 上限3,300円）：裏面の深さゲージ溝の終端がエンドミル切削による「丸み（R形状）」になっているか確認せよ（斜めのスロープ状は非純正コピー品のためPASS）。
+
 ## 領域10：アウトドア・純銀カトラリー・高級多層鍋（アムウェイ・ビタクラフト・ストウブ）
-- ヴィンテージギア＆ランタン：Coleman ピーク1 400 / 400A / 508（赤レバー＋黒サブレバーの2レバー式: 実売9,000〜18,000円 / 上限3,300円）、200A / 286Aランタン、アンバーグローブ、プリムス真鍮モデル、スノーピーク旧ロゴ（大文字ヤマコウ期）。
-- 純銀カトラリー（カテゴリ2084236781）：裏面に「SILVER」「SILVER 925」「SILVER 950」「STERLING」「純銀」「造幣局ホールマーク（日の丸＋ひし形925/1000）」があるもの（上限1,650円で即確保）。「EPNS」「SILVER PLATED」「NICKEL SILVER（洋白）」はメッキ・銅合金のためPASS。
-- 高級多層鍋・鋳物ホーロー鍋：アムウェイ（Amway Queen：ツヤ消し現行型が高値、金属円盤付きツヤあり旧型は取っ手確認）、ビタクラフト（VitaCraft：鍋底No.9202 / 9300 / 9435 / 9522 / 9204 / 9013〜9032 / 6113〜6132）、ストウブ（Staub：鍋縁の支柱跡3箇所と蓋裏ネジ頭のU字・数字刻印で真贋判定）。
+- ヴィンテージギア＆ランタン：Coleman ピーク1 400 / 400A / 508（赤レバー＋黒サブレバーの2レバー式: 実売9,000〜18,000円 / 上限3,300円）、200A / 286A / 290Aランタン、パイレックス赤レター/アンバーグローブ単体（上限1,650円）、プリムス真鍮モデル（IP-2245 / 2243）、スノーピーク旧ロゴ（大文字ヤマコウ期）。
+- 純銀カトラリー（カテゴリ2084236781）：裏面に「SILVER」「SILVER 925」「SILVER 950」「STERLING」「純銀」「造幣局ホールマーク（日の丸＋ひし形925/1000）」があるもの（1本でも上限1,650円、セットなら上限8,800円で即確保）。「EPNS」「SILVER PLATED」「NICKEL SILVER（洋白）」「E.P.B.M.」「STAINLESS」はメッキ・合金のためPASS。
+- 高級多層鍋・鋳物ホーロー鍋：アムウェイ（Amway Queen：取っ手がツヤ消し現行型が高値、金属円盤付きツヤあり旧型は状態確認）、ビタクラフト（VitaCraft：鍋底No.9202 / 9300 / 9435 / 9522 / 9204 / ウルトラNo.9310〜9506 / ヘキサプライNo.6113〜6132）、ストウブ（Staub：鍋縁の塗装支柱跡3箇所と蓋裏ネジ頭のU字・数字刻印で真贋判定）。
+
 ## 領域11：旧車・バイクパーツ（MOMO・NARDIステアリング・旧カーオーディオ・スピーカー）
-- NARDI（ナルディ）ステアリング（カテゴリ2084302710）：ボス取付部背面に「FET」刻印とシリアルコード、スポーク背面に「MADE IN ITALY」があるか（「DESIGNED IN ITALY」はPASS）。
-- MOMO（モモ）ステアリング（カテゴリ2084302708）：スポーク裏面に「MADE IN ITALY」、モデル番号前の「TYP表記（TYP V35, TYP M38等）」、「KBA番号」があるか確認せよ。
-- 旧車1DIN/2DINカーオーディオ・据置スピーカー：カロッツェリア（DEH-P710 / DEH-970 / KEH-P770+CDS-P77 / MEH-P919 / TS-X380 / TS-X40）、アルパイン（7909J / CDA-7949JG / ERA-G311）、デノン（DCT-Z1 / DCT-R1）、ケンウッド（KSC-8090 / DPX-4000）。
+- NARDI（ナルディ）ステアリング（カテゴリ2084302710）：ボス取付部背面に「FET」刻印とシリアルコード、右スポーク背面に「MADE IN ITALY」と「E.Nardi」サインがあるか（「DESIGNED IN ITALY」は安価なレプリカのためPASS）。
+- MOMO（モモ）ステアリング（カテゴリ2084302708）：スポーク裏面に「MADE IN ITALY」、モデル番号前の「TYP表記（TYP V35, TYP M38, TYP D35等）」、「KBA番号（KBA70068等）」があるか確認せよ。
+- 旧車1DIN/2DINカーオーディオ・据置スピーカー：カロッツェリア（DEH-P710 / DEH-970 / DEH-P01 / KEH-P770+CDS-P77 / MEH-P919 / TS-X380 / TS-X480G / TS-X40）、アルパイン（7909J / CDA-7949JG / CDA-9887JI / ERA-G311）、デノン（DCT-Z1 / DCT-R1 / DCT-A100）、ケンウッド（KSC-8090 / DPX-4000 / RX-690MD）。
+
 ## 領域12：ブランド手工具（Snap-on・KTCネプロス・PB Swiss Tools）
-- Snap-on（スナップオン）：第1世代「アンダーラインロゴ（1948〜1988年）」、裏面の「イヤーマーク（製造年刻印）」、旧ハードグリップは高値（実売6,000〜45,000円 / 上限3,300円）。
-- KTC ネプロス（nepros NBRC390S等）および PB Swiss Tools（S/Nシリアル番号刻印入りレインボーレンチ・ドライバー）。
+- Snap-on（スナップオン）：第1世代「アンダーラインロゴ（1948〜1988年）」、裏面の「イヤーマーク（製造年刻印）」、旧ハードグリップ（赤・オレンジ・黄色・緑の四角断面樹脂グリップ）は高値（実売6,000〜45,000円 / 上限3,300円）。
+- KTC ネプロス（nepros NBR390 / NBRC390S / NTB311A等：鏡面メッキとN刻印）および PB Swiss Tools（S/Nシリアル番号刻印入りレインボーレンチ212LH-10RB・スイスグリップドライバー）。
+
 ## 領域13：廃番文具・製図用品・ヴィンテージ万年筆
-- ロットリング（rotring 600 / 800 / ニュートン 旧型）：消しゴムキャップのてっぺんに「穴が開いていない」ものが希少な旧型。
-- ぺんてる廃番製図シャープ：『メカニカ（Mechanica）』、『PG1804（緑軸）』『PG2003』『PG1505』『テクノマチック（PN3015）』。
-- ヴィンテージ万年筆：ペン先の「14K / 585 / 14C」「18K / 750」「21K / 875」刻印。モンブラン（マイスターシュテュック149/146）、パイロット（シルバーン・カスタム・並木製作所）、セーラー、プラチナ（#3776）。
+- ロットリング（rotring 600 / 800 / ニュートン / トリオペン 旧型）：ノック部（消しゴムキャップ）のてっぺんに「空気穴が開いていない」ものが希少な西ドイツ（W.GERMANY）または初期旧型。
+- ぺんてる廃番製図シャープ：『メカニカ（Mechanica MEC 0.3/0.5mm：先端回転保護パイプ付、実売25,000〜60,000円 / 上限8,800円）』、『PG1804（緑軸）』『PG2003』『PG1505』『テクノマチック（PN3015）』。
+- ヴィンテージ万年筆：ペン先の「14K / 585 / 14C」「18K / 750」「21K / 875」刻印。モンブラン（マイスターシュテュック149/146/144）、パイロット（シルバーン・カスタム74/742/743/823・キャップレス・並木製作所）、セーラー（プロフィット21）、プラチナ（#3776センチュリー）。
+
 ## 領域14：廃番プラレール・ヴィンテージ超合金パーツ
-- 廃番プラレール（MADE IN JAPAN刻印、トミー旧ロゴ、複線外側高架曲線レール、4分岐ポイントレール）およびヴィンテージ超合金（ポピー、ゴールドライタン、ゴッドマーズ、青カゴ内のロケットパンチ手首パーツ単体）。
+- 廃番プラレール（裏面にMADE IN JAPAN刻印、トミー旧ロゴ、複線外側高架曲線レール、4分岐ポイントレール、旧動力前スイッチ車両）およびヴィンテージ超合金（ポピー、バンダイ、ゴールドライタン、ゴッドマーズ、コンバトラーV、青カゴ内のロケットパンチ手首パーツや武器パーツ単体）。
+
 ## 領域15：青箱高純度オーディオ・スタジオ・FA通信ケーブル・Apple絶版変換
 - ACROTEC / ACROLINK 6N/7N/8N銅ケーブル：被覆が「茶褐色半透明（銅線が透けて見える）」「濃緑」「濃紺」またはカーボン調プラグで、「STRESSFREE CABLE 99.99997% Cu」「6N-A2050」「6N-A2110II」「6N-A2200」「7N-A2110III」「7N-A2070」「7N-DA2090」印字。6N系は実売平均6,860〜12,078円（仕入上限2,200円）、7N系は実売平均38,518円・最高100,000円（仕入上限5,500円）。車載用M&M DESIGN / ACROLINK 7N-MA7000は実売98,000円（上限11,000円）。
 - OYAIDE PA-02 / PA-02 V2（パールホワイトまたはワインレッドの太いシース）および BELDEN 88760（硬質な鮮紅色被覆）/ 8412 ＋ NEUTRIK（ノイトリック）XLR/RCA端子：実売6,000〜13,000円（仕入上限1,650円）。
 - Apple純正 Thunderbolt to FireWire 800 Adapter 型番A1463（MD464ZM/A）：白い短い変換アダプタで片側が稲妻マーク（Thunderbolt）、逆側が角型9ピンFireWire 800端子。実売平均12,280円・最高24,800円（仕入上限3,300円）。
-- 産業用PLC / FAシーケンサ通信ケーブル：三菱電機 USB-QC30R2 / USB-SC-09-FX、オムロン USB-CIF02 / CS1W-CN。ケーブル中間に黄色・青・黒の変換ボックスがあるFA通信線。実売5,000〜6,900円（仕入上限1,100円）。
+- 産業用PLC / FAシーケンサ通信ケーブル：三菱電機 USB-QC30R2 / USB-SC-09-FX / GT09-C30USB-5P、オムロン USB-CIF02 / CS1W-CN226 / CQM1-CIF02。ケーブル中間に黄色・青・黒の変換ボックスがあるFA通信線。実売5,000〜6,900円（仕入上限1,100円）。
 - ICOM アマチュア無線セパレートケーブル OPC-581 / OPC-587（両端が特殊フラット多ピン角型樹脂コネクタ・中央ネジ付）：実売8,250〜11,800円（仕入上限2,200円）。CI-Vコンバータ CT-17は上限550円（実売1,877円）。
+
 ## 領域16：トーンアーム純正サブウェイト・セラミックシェル・消磁器・単体露出計・光学小物
 - トーンアーム純正サブウェイト（小さなクロームメッキ/ステンレス円筒分銅）：SME 3010-R/3009-R/3012-R用純正（約63g、実売9,900〜25,000円）、SAEC W-7H（WE-407/23用・側面に青いドット刻印「青ポチ」、実売22,800円）、SAEC WE-308SX純正（実売13,000円）、Technics SL-1200G/GR用サブウェイト（実売4,400円）。純正品は仕入上限3,300円（社外品は880円）。
 - セラミック製・高級ヘッドシェル：SAEC ULS-3X（象牙色オフホワイトまたは黒の酸化アルミ焼結セラミック製・約17.4g、実売平均30,007円・単体15,500〜28,000円、仕入上限8,800円）、SAEC ULS-8X（実売72,000円）、ortofon SH-4（実売平均12,549円）、SME S-2（リード線付、実売11,000〜12,000円）、Technics SH-98D（実売4,266円、上限2,200円）。
 - カセットデッキ用カセット型消磁器：TDK AH-301 / AH-201 HEAD ERASER（カセット形状の透明ケース内部に電子基板と電池ボックス・LED搭載）。実売平均4,313円・動作品3,980〜7,800円（仕入上限1,100円）。
 - 単体露出計：SEKONIC FLASHMATE L-308 / L-308S / L-308X（黒い薄型デジタル露出計、実売10,283〜26,000円、仕入上限3,300円）、STUDIO DELUXE L-398 / L-398M / L-398A（白い半球ルミディスク受光部付アナログ露出計、実売3,300〜10,000円、L-398Aは5万円超、仕入上限1,650円）。
-- 変倍アングルファインダー＆ライカ金属フード：Nikon DR-6（角窓用1x/2x切替レバー付L字鏡筒、実売3,854〜6,000円、上限1,100円）/ DR-5（実売5,000円）、Leica LEITZ WETZLAR GERMANY 12585 / IROOA スリット入り純正メタルフード（実売2,500〜5,000円、上限880円）。
+- 変倍アングルファインダー＆ライカ金属フード：Nikon DR-6（角窓用1x/2x切替レバー付L字鏡筒、実売3,854〜6,000円、上限1,100円）/ DR-5（丸窓用、実売5,000円）、Leica LEITZ WETZLAR GERMANY 12585 / IROOA / 12526 スリット入り純正メタルフード（実売2,500〜5,000円、上限880円）。
+
 ## 領域17：ハイエンド計測プローブ・プロ用マルチメーター・業務用調理器具・廃番一体型万年筆・旧620・銅ヘッドハンマー
-- オシロスコープ受動プローブ＆高級テストリード：Tektronix P6139A / P6139B（グレー小型BNCボックス、実売平均14,421円、上限2,200円）、FLUKE TL175 TwistGuard（先端回転伸縮機構）/ TL224 / SureGrip TLK-220（実売15,999〜21,000円、上限2,200円）、HIOKI ピン形リード 9465-10（実売9,800円、上限2,200円）。
-- 工業用マルチメーター・絶縁抵抗計：FLUKE 87 / 87 III / 87V（鮮やかな黄色ホルスター＋TRUE RMS MULTIMETER印字、実売平均22,088円・液晶薄めジャンクでも7,980〜15,000円、仕入上限6,600円）、HIOKI DT4253（実売12,500円、上限4,400円）、HIOKI IR4052 / IR4053 / IR4055 絶縁抵抗計（実売22,500〜33,000円、上限5,500円）、HIOKI 3244-60 カードハイテスタ（実売3,000〜4,970円、上限1,100円）。
-- 業務用オールステンレス調理器具（オフハウス・セカスト）：吉田金属工業 GLOBAL-PRO（ドット柄一体型ハンドルの刀身に通常のGLOBALではなく「GLOBAL-PRO」刻印がある業務用廃番モデル、実売平均13,915円・最高39,611円、仕入上限3,300円）、Misono UX10、GLESTAIN（グレステン）（実売18,999〜33,999円、上限4,400円）。
-- 廃番ペン先一体型万年筆・異形製図シャープ：PILOT MYU ミュー（ステンレス軸先端がそのまま流線型に伸びてペン先になっている一体型ショート万年筆、実売平均22,650円・最高59,800円、仕入上限5,500円）、TOMBOW（トンボ鉛筆）製図用シャープ SH-1500LP / バリアブル（異形グリップ溝加工、実売9,850〜18,000円、仕入上限2,200円）。
-- ホビー・アウトドア隠れ名機：タミヤ ミニ四駆・タムテック（NO.12）用 旧620ボールベアリング（外径6mm・内径2mmの初期仕様、2個〜セットで実売5,000円以上、上限1,100円）、Snow Peak ペグハンマー PRO.C N-001（黒い鍛造ヘッド先端に純銅ヘッド＋赤ストラップ、特に初期 solid series 刻印モデル、実売5,000円以上、上限1,650円）。
+- オシロスコープ受動プローブ＆高級テストリード：Tektronix P6139A / P6139B / TPP0500B（グレー小型BNCボックス、実売平均14,421円、上限2,200円）、FLUKE TL175 TwistGuard（先端回転伸縮機構）/ TL224 / SureGrip TLK-220（実売15,999〜21,000円、上限2,200円）、HIOKI ピン形リード 9465-10 / L2020（実売9,800円、上限2,200円）。
+- 工業用マルチメーター・絶縁抵抗計：FLUKE 87 / 87 III / 87V（鮮やかな黄色ホルスター＋TRUE RMS MULTIMETER印字、実売平均22,088円・液晶薄めジャンクでも7,980〜15,000円、仕入上限6,600円）、HIOKI DT4253 / DT4282（実売12,500〜24,000円、上限4,400円）、HIOKI IR4052 / IR4053 / IR4055 絶縁抵抗計（実売22,500〜33,000円、上限5,500円）、HIOKI 3244-60 カードハイテスタ（実売3,000〜4,970円、上限1,100円）。
+- 業務用オールステンレス調理器具（オフハウス・セカスト）：吉田金属工業 GLOBAL-PRO（ドット柄一体型ハンドルの刀身に通常のGLOBALではなく「GLOBAL-PRO」刻印がある業務用廃番モデル GP-1〜GP-16、実売平均13,915円・最高39,611円、仕入上限3,300円）、Misono UX10、GLESTAIN（グレステン：刀身にディンプルくぼみ加工）（実売18,999〜33,999円、上限4,400円）。
+- 廃番ペン先一体型万年筆・異形製図シャープ：PILOT MYU ミュー 701 / M90（ステンレス軸先端がそのまま流線型に伸びてペン先になっている一体型ショート万年筆、H771等の製造年月刻印、実売平均22,650円・最高59,800円、仕入上限5,500円）、TOMBOW（トンボ鉛筆）製図用シャープ SH-1500LP / バリアブル VARIABLE（異形グリップ溝加工・長さ調整機構、実売9,850〜18,000円、仕入上限2,200円）。
+- ホビー・アウトドア隠れ名機：タミヤ ミニ四駆・タムテック（ITEM 15034 / NO.12）用 旧620ボールベアリング（外径6mm・内径2mmの初期肉厚シール仕様、2個〜4個セットで実売5,000〜14,000円、上限1,100円）、Snow Peak ペグハンマー PRO.C N-001（黒い鍛造ヘッド先端に純銅ヘッド＋赤ストラップ、特に初期 solid series 刻印モデル、実売5,000〜8,500円、上限1,650円）。
+
 # モジュールC：4大リユースチェーン「プライスカード（値札）暗号・バーコード体系」完全解読ルール
 1. ハードオフ・オフハウス：赤札（中古保証付）、青札（新品）、黄札（新古・未使用）、白緑枠札（ジャンク・お宝宝庫）、小槌シール（相場未確認の超お宝宝庫）。上下2段日付は「上段＝販売開始日、下段＝値下げ日」。
 2. セカンドストリート：下部エリアCの6桁数字は「右から左へ逆読み（DDMMYY）」で日付解読せよ。値札の「管理」欄に番号がある場合、バックヤードにリモコン・電源・箱が別保管されているため has_backyard_accessory_alert を true にせよ。
 3. ブックオフ：黒枠＝1〜3月、緑枠＝4〜6月、青枠＝7〜9月、赤枠＝10〜12月。内部記号「●（黒丸）」「〇（白丸）」「YO（ヤフオク高回転）」「★」「V4/V3」は優先確保、「YX」「C」「D」は即座に PASS とせよ。
 [SYSTEM_STATIC_PREFIX_END]
 `.trim();
+
+        // 無駄な26,800文字の繰り返しループを撤廃し、重複なしの網羅的リファレンス辞書を1回だけ結合することで
+        // Gemini 4 Argon / Gemini 3.8 Flash の暗黙的キャッシュ（90〜95%割引）基準を純粋な知識のみで確実に満たす
         function buildGuaranteedStaticPrompt() {
-            let base = CORE_MASTER_KB;
-            const staticReferenceTable = `
-# 追加型番・17領域視覚照合リファレンス拡張テーブル（暗黙的キャッシュ固定用）
-- マキタ・HiKOKI工具型番：TD173DRGX / TD172DRGX / TD171DRGX / TD162D / TD149D / DF486D / HP486D / HS631D / GA404D / JR188D / TM52D / CW001G / TD001G / TD002G / WH36DC / WH36DD / WR36DC / C3606DA / RB36DA / UL18DB / BSL36A18 / BSL36B18 / UC18YDL2.
-- 旧車ステアリング・カーオーディオ・高級ケーブル型番：MOMO TYP V35 / TYP M38 / KBA70068 / KBA70056 / M2 1001 / MOD 07 / NARDI CLASSIC / GARA3 / DEH-P710 / DEH-970 / DEH-P640 / KEH-P770 / CDS-P77 / KDS-P500 / MEH-P919 / TS-Z1000RS / TS-X380 / TS-X40 / 7909J / CDA-7949JG / CDA-117Ji / ERA-G311 / 3DA-W882J / DCT-Z1 / DCT-R1 / DPX-4000 / DPX-7100MDi / KSC-8090 / ACROTEC 6N-A2050 / 6N-A2110II / 6N-A2200 / ACROLINK 7N-A2110III / 7N-A2070 / 7N-DA2090 / 7N-MA7000 / OYAIDE PA-02 / BELDEN 88760 / Apple A1463 MD464ZM/A / USB-QC30R2 / USB-SC-09-FX / USB-CIF02 / OPC-581 / OPC-587 / CT-17.
-- ブランド手工具・精密測定器・プローブ型番：Snap-on FHCNF72 / F80 / FL80 / SVSM807A / 212FMSY / 96ACF / KTC nepros NBRC390S / NBR390 / GEK135-R4 / PB Swiss Tools 212LH-10 / 8560.CBB / Mitutoyo CD-15AX / CD-15CPX / CD-20AX / CD-60C / MDC-25MJ / MDC-25MX / SJ-201 / HIOKI 3280-10F / DT4253 / 3244-60 / 9465-10 / IR4051-10 / IR4052 / IR4053 / IR4055 / FLUKE 87 / 87V / 117 / 179 / TL175 / TL224 / TLK-220 / Tektronix P6139A / P6139B.
-- 廃番文具・万年筆・光学・オーディオ小物型番：rotring 600 / 800 / Newton / Pentel Mechanica MEC / PG1505 / PG1804 / PG2003 / PG15 / Technomatic PN3015 / PILOT MYU 701 / TOMBOW SH-1500LP / MONTBLANC Meisterstuck 149 / 146 / 4810 14C / 14K 585 / 18K 750 / PILOT Custom 74 / 743 / Silvern / SAILOR Profit 21K 875 / PLATINUM 3776 Century / SME 3010-R / 3009-R / S-2 / SAEC W-7H / WE-308SX / ULS-3X / ULS-8X / ortofon SH-4 / Technics SH-98D / TDK AH-301 / SEKONIC L-308 / L-308S / L-308X / L-398 / L-398A / Nikon DR-6 / DR-5 / Leica 12585 / IROOA / GLOBAL-PRO / Misono UX10 / GLESTAIN / Snow Peak PRO.C N-001.
+            const comprehensiveCatalogReference = `
+# 追加型番・全17領域ディープ照合リファレンス辞書（暗黙的キャッシュ固定・重複水増しなし純粋カタログ）
+- [領域1 工具・バッテリー詳細型番] マキタ Makita: TD173DRGX / TD173DZ / TD172DRGX / TD171DRGX / TD162DRGX / TD149DRFX / TW300DRGX / TW700DRGX / DF486DRGX / HP486DRGX / HS631DGXS / HS474DRGX / GA404DZN / GA408DRGX / JR188DRGX / JR189DRGX / TM52DRG / MUR190UDRG / MUC254DRGX / CW001GZO / CW003GZO / TD001GRDX / TD002GRDX / TW004GRDX /GA001GRDX / HS001GRDX / ML807 / DMR203 / BL1860B / BL1850B / BL1840B / BL1830B / BL1460B / BL1430B / BL4025 / BL4040 / BL4050F / DC18RF / DC18RC / DC18RD / DC18SH / DC40RA / DC40RB. HiKOKI 日立工機: WH36DC / WH36DD / WH18DDL2 / WH18DC / WR36DC / WR36DD / C3606DA / C3605DA / RB36DA / CR36DA / G3610DA / DH36DPA / UL18DB / UL18DC / BSL36A18 / BSL36B18 / BSL36A18X / BSL36B18X / UC18YDL2 / UC18YSL3. Panasonic: EZ75A7 / EZ76A1 / EZ1PD1 / EZ46A1 / EZ9L54. MAX: PJ-ID153 / TJ-35P4 / HN-65N3 / HN-90N5 / AK-HL1270E3.
+- [領域2 PC基板・産業インターフェース詳細型番] Adaptec: AHA-2940UW / AHA-2940U2W / AHA-2940AU / AHA-2930CU / ASC-29160 / ASC-29160N / ASC-29320LPE / ASC-19160 / AHA-1542CF / AHA-1542CP / AVA-2904 / APA-1480A (SlimSCSI). 3dfx Interactive: Voodoo Graphics Diamond Monster 3D / Voodoo2 Creative 3D Blaster CT6670 / Canopus Pure3D II / Voodoo3 2000 / Voodoo3 3000 AGP / Voodoo5 5500. Creative Sound Blaster: CT2760 AWE32 / CT3980 AWE32 PnP / CT4390 AWE64 Gold / CT4540 AWE64 Gold / CT1350B / CT1600. NEC PC-9801 Cバス: PC-9801-86 (86音源) / PC-9801-26K / PC-9801-118 / Canopus PowerWindow 964LB / Melco WSN-A2F. アースソフト: PT1 Rev.A / PT2 Rev.A / PT2 Rev.B / PT3 Rev.A. Advantech / CONTEC (コンテック): PIO-32/32L(PCI)H / AIO-160802AY-USB / GPIB-FL-LPE / National Instruments PCI-GPIB / GPIB-USB-HS.
+- [領域3・4 特殊電源・純正リモコン詳細型番] Roland / BOSS: ACI-100C / ACI-100J / PSB-1U / PSB-100 / PSB-12U / ACB-120 / PSA-100G / PSA-100P / PSA-100S / ACA-100G / BRC-100T (AC-AC 14V). KORG: KA161 / KA163 / KA181 / KA183 / KA191 / KA310 / KA320. Yamaha: PA-6 / PA-5 / PA-5B / PA-5C / PA-5D / PA-300B / PA-300C / PA-150A. Akai / Ensoniq / Line6: PX-2 (AC9V 2000mA AC-AC) / DigiTech PS0913B (AC9V). Pioneer リモコン: CU-CLD016 / CU-CLD100 / CU-CLD057 / CU-DV012 / CU-AV100 / CU-VSD005 / AXD7534. Sony リモコン: RM-J701 / RM-J901 / RM-D29M / RM-D39M / RM-LJ304 / RM-PP412 / RMT-B015J. 業務用空調リモコン: ダイキン BRC1E3 / BRC1C1 / BRC1G1 / BRC1G3 / 三菱電機 PAR-21MA / PAR-24MA / PAR-31MA / PAR-40MA / 日立 PC-ARF3 / PC-ARF5.
+- [領域5・6・7・8 音響・光学・ゲーム・楽器詳細型番] カセットテープ: TDK MA-R46 / MA-R60 / MA-R90 / MA-XG46 / MA-XG60 / MA-XG90 / MA-XG Fermo / AR-X / SA-X / Sony Metal Master 60/90 / Super Metal Master / Maxell Metal Vertex 60/90 / XLII-S / AXIA PS-Metal. カートリッジ: Denon DL-103 / DL-103R / DL-103S / DL-103D / DL-301II / Ortofon SPU Classic GE / SPU Synergy / Concorde Nightclub / Shure V15 Type III 白文字・黄文字 / V15 Type IV / V15VxMR / M44G / M44-7 / Audio-Technica AT-33E / AT-33PTG / AT-15Ea / Empire 4000D/I / Technics EPC-205C-IIX. オールドレンズ: Asahi Opt. Super-Takumar 50mm F1.4 (初期8枚玉・後期7枚玉) / SMC Takumar 50mm F1.4 / Super-Takumar 35mm F2 / 85mm F1.9 / 105mm F2.8 / Auto Yashinon-DX 50mm F1.4 / Auto Yashinon-DS 50mm F1.7 / Tominon 55mm F1.2 / Canon FD 55mm F1.2 S.S.C. / New FD 50mm F1.2L / FD 85mm F1.8 S.S.C. / Nikon Nikkor-S Auto 50mm F1.4 / Nikkor-S Auto 55mm F1.2 / Nikkor-H Auto 85mm F1.8 / Ai Nikkor 50mm F1.2S / Minolta MC Rokkor-PG 58mm F1.2 / MD Rokkor 50mm F1.2 / Olympus OM Zuiko Auto-S 50mm F1.2 / 55mm F1.2. レトロゲーム: DOL-009 (GC D端子) / DOL-010 (GCコンポーネント) / DOL-004 + DOL-005 (WaveBird) / SHVC-008 / HKT-8100 (DC VGA Box) / HKT-7300 (DCブロードバンドアダプタ HIT-0400) / HSS-0150 (SS 4MB RAM) / HSS-0136 (SSマルチターミナル6) / PCE-AC1 (アーケードカードPRO) / PCE-AC2 (DUO). エフェクター: BOSS OD-1 (銀ネジ・黒ラベル・RC3403ADB・μPC4741C) / CE-2 / DM-2 / DM-3 / VB-2 / SG-1 (Slow Gear) / SP-1 (Spectrum) / PH-1 / PH-1R / DS-1 / SD-1 / BF-2 / CS-1 / CS-2 / HM-2 / MZ-2 / Ibanez TS808 / TS9 / TS10 / FL9 / CS9 / Maxon OD-808 / ProCo RAT1 / RAT2 (Flat Box LM308N).
+- [領域9・10・11・12 測定器・キッチン・旧車・手工具詳細型番] Mitutoyo: CD-15AX / CD-15APX / CD-15CPX / CD-20AX / CD-30AX / CD-60C / NTD12-15PMX / MDC-25MJ / MDC-25MX / MDC-50MX / SJ-201P / SJ-210 / SJ-301. KEYENCE: FS-V31 / FS-V31P / FS-N11N / FS-N41N / LV-N11N / LR-ZB250N / PZ-G41N / IV-HG500MA. Coleman: Peak1 400 (茶ピーク) / 400A (黒ピーク2レバー) / 508 (2レバー) / 502 Sportster / 200A (パテペン・赤ランタン・緑200A) / 286A / 288A / 635B. 多層鍋: Amway Queen 6Lシチューパン / 4Lシチューパン / 大フライパン / 中フライパン / 大ソースパン / 中ソースパン / 小ソースパン / ウォック / VitaCraft Ultra No.9202 / No.9310 / No.9411 / No.9503 / Super5 No.5121 / No.5125 / Hexa-Ply No.6114 / No.6122 / Staub Picot Cocotte Round 18cm / 20cm / 22cm / 24cm. 旧車ステアリング・カー音響: NARDI Classic ウッド&ポリッシュ 36.5φ / 33φ / GARA3 / Torino / MOMO Race TYP D35 / Corse TYP D32 / Prototipo / Monte Carlo TYP V35 / Indykart / Pioneer Carrozzeria DEH-P710 / DEH-970 / DEH-P01 / DEH-P910 / DEH-P930 / DEH-P940 / MEH-P919 / KEH-P770 / CDS-P77 / KDS-P500 / TS-X380 / TS-X480G / TS-X40 / TS-V172A / Alpine 7909J / CDA-7949JG / CDA-7990J (F#1Status) / CDA-9887JI / ERA-G311 / 3DA-W882J / Denon DCT-Z1 / DCT-R1 / DCT-A100 / DCT-1000 / Kenwood KSC-8090 / DPX-4000 / DPX-5021M. 手工具: Snap-on F80 / FL80 / FH80 / FHNF100 / FHCNF72 / FHLF80 / S80A / SOEXM / FDMI / 212FMSY / KTC nepros NBR390 / NBRC390 / NBR390FS / NTB311A / PB Swiss Tools 212LH-10RB / 8240RB.
+- [領域13・14・15・16・17 文具・超合金・高純度ケーブル・光学小物・プローブ詳細型番] 製図・万年筆: rotring 600 (0.3/0.5/0.7/万年筆/トリオペン) / rotring 800 / rotring 900 / Newton / Rapidograph / Pentel Mechanica MEC 0.3mm / 0.5mm (中期・後期) / Pentel PG1804 / PG2003 / PG1505 / PG15 / Accugraph / Technomatic PN3015 / Excalibur / PILOT MYU 701 (H771〜H1178) / MYU Black Stripe (ミューストライプ) / M90 / TOMBOW Variable SH-1500LP (0.3/0.4/0.5) / SH-1500VP / Faber-Castell alpha-matic / Staedtler 925 95 / Montblanc Meisterstuck 149 (14C/14K/18C/18K 中白・エボナイトペン芯) / 146 / 144. 高純度ケーブル・FA通信・Apple変換: ACROTEC 6N-A2050 / 6N-A2110 / 6N-A2110II / 6N-A2200 / 6N-A2410 / 6N-P4020 / 6N-S1010 / ACROLINK 6N-A2050II / 6N-A2050III / 7N-A2110III / 7N-A2070 / 7N-A2400III / 7N-DA2090 Speciale / M&M DESIGN 7N-MA7000 / 7N-MA9000CORSA / OYAIDE PA-02 / PA-02 V2 / PA-02 TXM / Tunami Terzo / AZ-910 / BELDEN 88760 / 8412 / 19364 / Apple A1463 MD464ZM/A (Thunderbolt to FireWire 800) / A1433 MD463ZM/A (Thunderbolt to Gigabit Ethernet) / 三菱電機 USB-QC30R2 / USB-SC09-FX / オムロン USB-CIF02 / CS1W-CN226 / ICOM OPC-581 / OPC-587 / CT-17. トーンアーム・ヘッドシェル・露出計・プローブ・包丁: SME 3010-R / 3009-R / 3012-R Sub-weight / SME S-2 / SAEC W-7H (WE-407/23青ポチ分銅) / WE-308SX Sub-weight / SAEC ULS-3X / ULS-8X / Technics SH-98D / SFPCC31001K1 / ortofon SH-4 / LH-2000 / TDK AH-301 / AH-201 / SONY HE-2 / SEKONIC L-308B / L-308S / L-308X / L-398 / L-398M / L-398A / L-478D / Nikon DR-6 / DR-5 / DR-4 / Leica 12585 / 12585H / IROOA / 12526 / 12504 / Tektronix P6139A / P6139B / P6243 / FLUKE TL175 / TL224 / TLK-220 / FLUKE 87 / 87 III / 87V / 179 / 289 / HIOKI DT4253 / DT4282 / IR4052-50 / IR4053-10 / 3244-60 / 9465-10 / 吉田金属 GLOBAL-PRO GP-1 / GP-2 / GP-3 / GP-4 / GP-11 / GP-12 / GP-14 / GP-15 / Misono UX10 No.711 / No.712 / No.721 / グレステン Tタイプ 721TK / 821TMM / タミヤ 旧620ベアリング (AO-1011初期・ITEM15034) / Snow Peak PRO.C N-001.
 `.trim();
-            let idx = 1;
-            while (base.length < 26800) {
-                base += `\n\n[STATIC_REFERENCE_BLOCK_ARCHIVE_${idx}]\n` + staticReferenceTable;
-                idx++;
-            }
-            return base;
+            return CORE_MASTER_KB + "\n\n" + comprehensiveCatalogReference;
         }
         const STATIC_MASTER_PROMPT = buildGuaranteedStaticPrompt();
+
         // ============================================================================
-        // 2. DOM要素とグローバル状態管理
+        // 2. DOM要素とグローバル状態管理（くるくる金額上限・売場オート・自動保存バッジ統合）
         // ============================================================================
         const mainVideo = document.getElementById('mainVideo');
         const pipVideo = document.getElementById('pipVideo');
@@ -1432,6 +1685,7 @@
         const chatMessages = document.getElementById('chatMessages');
         const settingsModal = document.getElementById('settingsModal');
         const stockManagerModal = document.getElementById('stockManagerModal');
+        const priceTagCheckerModal = document.getElementById('priceTagCheckerModal');
         const cacheAuditText = document.getElementById('cacheAuditText');
         const cameraCapAuditText = document.getElementById('cameraCapAuditText');
         const vcBarcodeIndicator = document.getElementById('vcBarcodeIndicator');
@@ -1444,6 +1698,11 @@
         const cmdAutoBtn = document.getElementById('cmdAutoBtn');
         const cmdShortVoiceBtn = document.getElementById('cmdShortVoiceBtn');
         const cmdExpandPipBtn = document.getElementById('cmdExpandPipBtn');
+        const autosaveStatusBadge = document.getElementById('autosaveStatusBadge');
+        const cornerFocusSelect = document.getElementById('cornerFocusSelect');
+        const vcCornerFocusSelect = document.getElementById('vcCornerFocusSelect');
+        const budgetCapWheelSelect = document.getElementById('budgetCapWheelSelect');
+        const vcBudgetWheelSelect = document.getElementById('vcBudgetWheelSelect');
         const operationModeSelect = document.getElementById('operationModeSelect');
         const corporateSettingsBlock = document.getElementById('corporateSettingsBlock');
         const apiKeyInput = document.getElementById('apiKeyInput');
@@ -1457,6 +1716,7 @@
         const voiceModeSelect = document.getElementById('voiceModeSelect');
         const partnerNameInput = document.getElementById('partnerNameInput');
         const storeNameInput = document.getElementById('storeNameInput');
+        const storeAddressInput = document.getElementById('storeAddressInput');
         const kobutsuCommInput = document.getElementById('kobutsuCommInput');
         const kobutsuNumInput = document.getElementById('kobutsuNumInput');
         const kobutsuHolderInput = document.getElementById('kobutsuHolderInput');
@@ -1467,6 +1727,7 @@
         const vcTorchBtn = document.getElementById('vcTorchBtn');
         const chatZoomBtn = document.getElementById('chatZoomBtn');
         const chatTorchBtn = document.getElementById('chatTorchBtn');
+
         let stream = null;
         let isAnalyzing = false;
         let isSpinCapturing = false;
@@ -1474,16 +1735,21 @@
         let autoScanTimer = null;
         let isAutoScan = false;
         let isShortCallsignMode = false;
+        let currentCornerFocusMode = 'AUTO';
+        let currentBudgetCapYen = 0;
         let callSeconds = 0;
         let dHashRingBuffer = [];
         const MAX_DHASH_RING_SIZE = 45;
         let storeSynergyMemory = [];
         let appraisalRecordMap = {};
         let spinJobCounter = 0;
+        let cachedLocalRagSummary = '';
+
         // Argon稼働中のレート制限回避＆サーキットブレーカー状態
         let proInFlightCount = 0;
         let proConsecutiveFailures = 0;
         let proCircuitOpenUntil = 0;
+
         // Flashリアルタイム追尾モード用の状態管理
         let trackingState = {
             active: false,
@@ -1498,6 +1764,7 @@
             lastTickTime: 0,
             lastBgPassTime: 0
         };
+
         let latestBarcodeInfo = {
             raw: '',
             type: '',
@@ -1507,6 +1774,7 @@
         };
         let barcodeDetectorInstance = null;
         let barcodeEngineName = '未起動';
+
         const StoreCameraController = {
             track: null,
             capabilities: {},
@@ -1524,6 +1792,52 @@
             evValue: 0,
             isRecovering: false
         };
+
+        // 売場（コーナー）オート見極めモード同期関数
+        function syncCornerFocusMode(val, skipChime) {
+            currentCornerFocusMode = val || 'AUTO';
+            if (cornerFocusSelect && cornerFocusSelect.value !== currentCornerFocusMode) {
+                cornerFocusSelect.value = currentCornerFocusMode;
+            }
+            if (vcCornerFocusSelect && vcCornerFocusSelect.value !== currentCornerFocusMode) {
+                vcCornerFocusSelect.value = currentCornerFocusMode;
+            }
+            localStorage.setItem('hunter_corner_focus', currentCornerFocusMode);
+            dHashRingBuffer = [];
+            if (!skipChime) {
+                unlockAudioEngine();
+                playAlertChime('PASS');
+                flashAutosaveBadge();
+            }
+        }
+
+        // くるくる金額上限ダイヤル（先頭0＝天井なし、以降1,000円刻み）同期関数
+        function syncBudgetCapWheel(val, skipChime) {
+            const numVal = parseInt(val, 10) || 0;
+            currentBudgetCapYen = numVal;
+            const strVal = String(numVal);
+            if (budgetCapWheelSelect && budgetCapWheelSelect.value !== strVal) {
+                budgetCapWheelSelect.value = strVal;
+            }
+            if (vcBudgetWheelSelect && vcBudgetWheelSelect.value !== strVal) {
+                vcBudgetWheelSelect.value = strVal;
+            }
+            if (budgetCapWheelSelect) {
+                if (numVal > 0) {
+                    budgetCapWheelSelect.classList.add('budget-active');
+                } else {
+                    budgetCapWheelSelect.classList.remove('budget-active');
+                }
+            }
+            localStorage.setItem('hunter_budget_cap_yen', strVal);
+            dHashRingBuffer = [];
+            if (!skipChime) {
+                unlockAudioEngine();
+                playAlertChime('PASS');
+                flashAutosaveBadge();
+            }
+        }
+
         const APPRAISAL_RESPONSE_SCHEMA = {
             type: "OBJECT",
             properties: {
@@ -1587,6 +1901,7 @@
                 "line_message"
             ]
         };
+
         const TRACKING_RESPONSE_SCHEMA = {
             type: "OBJECT",
             properties: {
@@ -1600,14 +1915,28 @@
             },
             required: ["match_status", "direction_guide", "is_clear_other_item"]
         };
+
         // ============================================================================
-        // 3. IndexedDB 全自動オートセーブ ＆ ストレージ容量ヘルスチェック（自動整理）
+        // 3. IndexedDB 全自動オートセーブ・入力リアルタイム保存・ゼロ円ローカルRAG
         // ============================================================================
         const DB_NAME = 'HunterLedgerDB_v2';
         const STORE_CONFIRMED = 'confirmed_items';
         const STORE_CHAT_AUTOSAVE = 'chat_history_autosave';
         const STORE_APP_STATE = 'app_state_autosave';
         let dbInstance = null;
+
+        function flashAutosaveBadge(customLabel) {
+            if (!autosaveStatusBadge) return;
+            const count = Object.keys(appraisalRecordMap).length;
+            autosaveStatusBadge.innerText = customLabel || `💾自動保存(${count}件)`;
+            autosaveStatusBadge.classList.add('saving-flash');
+            setTimeout(() => {
+                if (autosaveStatusBadge) {
+                    autosaveStatusBadge.classList.remove('saving-flash');
+                }
+            }, 650);
+        }
+
         function openHunterDB() {
             return new Promise((resolve, reject) => {
                 if (dbInstance) {
@@ -1639,6 +1968,7 @@
                 };
             });
         }
+
         async function checkStorageQuotaAndPrune(maxHistoryCount) {
             let limit = maxHistoryCount || 35;
             if (navigator.storage && navigator.storage.estimate) {
@@ -1654,19 +1984,25 @@
             }
             return limit;
         }
+
         async function saveItemToLocalDB(recordObj) {
             try {
                 const db = await openHunterDB();
                 return new Promise((resolve) => {
                     const tx = db.transaction([STORE_CONFIRMED], 'readwrite');
                     tx.objectStore(STORE_CONFIRMED).put(recordObj);
-                    tx.oncomplete = () => resolve(true);
+                    tx.oncomplete = () => {
+                        refreshLocalRagCache();
+                        flashAutosaveBadge();
+                        resolve(true);
+                    };
                     tx.onerror = () => resolve(false);
                 });
             } catch (e) {
                 return false;
             }
         }
+
         async function getAllItemsFromLocalDB() {
             try {
                 const db = await openHunterDB();
@@ -1684,19 +2020,41 @@
                 return [];
             }
         }
+
+        // 自分のスマホに蓄積された過去確保データをAIに自動注入する「ゼロ円ローカルRAG」生成
+        async function refreshLocalRagCache() {
+            try {
+                const items = await getAllItemsFromLocalDB();
+                if (!items || items.length === 0) {
+                    cachedLocalRagSummary = '';
+                    return;
+                }
+                const recent = items.slice(0, 20).map(it => {
+                    return `${it.store_name || '店舗'}:${it.model || ''}(仕入${it.store_price_yen || 0}円/売価${it.recommended_sell_yen || 0}円/純利+${it.net_profit_yen || 0}円)`;
+                });
+                cachedLocalRagSummary = recent.join(' | ');
+            } catch (e) {
+                cachedLocalRagSummary = '';
+            }
+        }
+
         async function deleteItemFromLocalDB(ledgerId) {
             try {
                 const db = await openHunterDB();
                 return new Promise((resolve) => {
                     const tx = db.transaction([STORE_CONFIRMED], 'readwrite');
                     tx.objectStore(STORE_CONFIRMED).delete(ledgerId);
-                    tx.oncomplete = () => resolve(true);
+                    tx.oncomplete = () => {
+                        refreshLocalRagCache();
+                        resolve(true);
+                    };
                     tx.onerror = () => resolve(false);
                 });
             } catch (e) {
                 return false;
             }
         }
+
         async function autoSaveChatBubbleToDB(bubbleData) {
             try {
                 const keepLimit = await checkStorageQuotaAndPrune(35);
@@ -1714,11 +2072,44 @@
                             store.delete(toDelete[i].recordId);
                         }
                     }
+                    flashAutosaveBadge();
                 };
             } catch (e) {}
         }
+
+        // 吹き出し内の仕入れ値・売価・テスター検品メモ等を入力した瞬間にリアルタイムでオートセーブする
+        function triggerRealtimeDraftAutosave(recordId) {
+            const item = appraisalRecordMap[recordId];
+            if (!item) return;
+            const buyEl = document.getElementById('buyPrice_' + recordId);
+            const sellEl = document.getElementById('sellPrice_' + recordId);
+            const noteEl = document.getElementById('testerNote_' + recordId);
+            const mktEl = document.getElementById('marketTarget_' + recordId);
+            const condEl = document.getElementById('itemCond_' + recordId);
+            const serEl = document.getElementById('serialFeat_' + recordId);
+            const janEl = document.getElementById('janCode_' + recordId);
+            const pseEl = document.getElementById('pseShip_' + recordId);
+            const invEl = document.getElementById('invoiceType_' + recordId);
+            const panelEl = document.getElementById('panel_' + recordId);
+
+            item.draftInputs = {
+                panelOpen: panelEl ? (panelEl.style.display === 'block') : false,
+                buyPrice: buyEl ? buyEl.value : '',
+                sellPrice: sellEl ? sellEl.value : '',
+                testerNote: noteEl ? noteEl.value : '',
+                marketTarget: mktEl ? mktEl.value : '',
+                itemCond: condEl ? condEl.value : '',
+                serialFeat: serEl ? serEl.value : '',
+                janCode: janEl ? janEl.value : '',
+                pseShip: pseEl ? pseEl.value : '',
+                invoiceType: invEl ? invEl.value : ''
+            };
+            autoSaveChatBubbleToDB(item);
+        }
+
         async function restoreAutoSavedChatHistory() {
             try {
+                await refreshLocalRagCache();
                 const db = await openHunterDB();
                 const tx = db.transaction([STORE_CHAT_AUTOSAVE, STORE_APP_STATE], 'readonly');
                 const chatReq = tx.objectStore(STORE_CHAT_AUTOSAVE).getAll();
@@ -1728,8 +2119,20 @@
                     list.sort((a, b) => (a.createdMs || 0) - (b.createdMs || 0));
                     for (let i = 0; i < list.length; i++) {
                         const b = list[i];
-                        renderPartnerAppraisal(b.annotatedDataUrl, b.cleanDataUrl, b.appraisal, false, b.recordId, true, b.extraBadgeText);
+                        renderPartnerAppraisal(
+                            b.annotatedDataUrl,
+                            b.cleanDataUrl,
+                            b.appraisal,
+                            false,
+                            b.recordId,
+                            true,
+                            b.extraBadgeText,
+                            b.spinCleanUrls || [b.cleanDataUrl],
+                            b.selectedPhotoIdx || 0,
+                            b.draftInputs || null
+                        );
                     }
+                    flashAutosaveBadge();
                 };
                 pinReq.onsuccess = () => {
                     const pin = pinReq.result;
@@ -1743,6 +2146,7 @@
                 };
             } catch (e) {}
         }
+
         async function savePinnedStateToDB() {
             try {
                 const db = await openHunterDB();
@@ -1755,6 +2159,7 @@
                 });
             } catch (e) {}
         }
+
         async function clearChatHistoryConfirm() {
             unlockAudioEngine();
             if (!confirm('トーク画面の候補履歴をクリアして白紙に戻しますか？（確保ストックに保存したお宝データは消えません）')) {
@@ -1778,9 +2183,11 @@
                 const tx = db.transaction([STORE_CHAT_AUTOSAVE, STORE_APP_STATE], 'readwrite');
                 tx.objectStore(STORE_CHAT_AUTOSAVE).clear();
                 tx.objectStore(STORE_APP_STATE).clear();
+                flashAutosaveBadge('💾自動保存(0件)');
             } catch (e) {}
             playAlertChime('PASS');
         }
+
         // ============================================================================
         // 4. ハイブリッドEAN-13バーコード検出器（Visionキャプチャとの排他制御付）
         // ============================================================================
@@ -1823,6 +2230,7 @@
             }
             updateCameraAuditDisplay();
         }
+
         function startBarcodeLoop() {
             setInterval(async () => {
                 // Visionキャプチャ中や3連写中はメインスレッド阻塞を防ぐためバーコード検出をスキップ
@@ -1845,6 +2253,7 @@
                 }
             }, 680);
         }
+
         function classifyAndStoreBarcode(codeStr) {
             const now = Date.now();
             const prefix2 = codeStr.substring(0, 2);
@@ -1883,6 +2292,7 @@
                 vcBarcodeIndicator.style.color = '#29b6f6';
             }
         }
+
         // ============================================================================
         // 5. カメラ起動3段階セーフティ ＆ 画面ロック・アプリ切替からの段階的制約リカバリー
         // ============================================================================
@@ -1938,6 +2348,7 @@
                 }, 350);
             }
         }
+
         // 複合制約の一括適用によるOverconstrainedErrorを防ぐため、1項目ずつ段階的に適用する
         async function initStoreCameraCapabilities(track) {
             if (!track || track.readyState !== 'live') return;
@@ -1998,6 +2409,7 @@
             }
             updateCameraAuditDisplay();
         }
+
         async function verifyAndRecoverCameraStream() {
             if (StoreCameraController.isRecovering || document.visibilityState !== 'visible') return;
             StoreCameraController.isRecovering = true;
@@ -2017,6 +2429,7 @@
                 StoreCameraController.isRecovering = false;
             }
         }
+
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
                 verifyAndRecoverCameraStream();
@@ -2028,6 +2441,7 @@
         window.addEventListener('focus', () => {
             verifyAndRecoverCameraStream();
         });
+
         async function cycleCameraZoom() {
             unlockAudioEngine();
             let nextZoom = 1;
@@ -2037,6 +2451,7 @@
             await applyZoomLevel(nextZoom);
             playAlertChime('PASS');
         }
+
         async function applyZoomLevel(zoomLevel) {
             StoreCameraController.targetZoom = zoomLevel;
             const track = StoreCameraController.track;
@@ -2068,6 +2483,7 @@
             dHashRingBuffer = [];
             updateCameraAuditDisplay();
         }
+
         async function toggleCameraTorch() {
             unlockAudioEngine();
             const track = StoreCameraController.track;
@@ -2092,6 +2508,7 @@
             playAlertChime('PASS');
             updateCameraAuditDisplay();
         }
+
         async function applyExposureCompensationSetting() {
             const ev = parseFloat(exposureCompSelect.value) || 0;
             StoreCameraController.evValue = ev;
@@ -2104,12 +2521,14 @@
             }
             updateCameraAuditDisplay();
         }
+
         function updateCameraAuditDisplay() {
             const zoomMode = StoreCameraController.supportsHardwareZoom ? '光学/HW' : 'デジタルクロップ';
             const torchMode = StoreCameraController.supportsTorch ? (StoreCameraController.torchOn ? '点灯中' : '待機') : '非対応';
             const evMode = StoreCameraController.supportsExposureComp ? `HW(${StoreCameraController.evValue}EV)` : `Canvas(${StoreCameraController.evValue}EV)`;
             cameraCapAuditText.innerText = `カメラ：${StoreCameraController.targetZoom}x[${zoomMode}] / ライト[${torchMode}] / 露出[${evMode}] / JAN[${barcodeEngineName}]`;
         }
+
         function togglePipExpandSize() {
             unlockAudioEngine();
             const isExpanded = floatingPip.classList.toggle('expanded-pip');
@@ -2121,6 +2540,7 @@
             }
             playAlertChime('PASS');
         }
+
         // ============================================================================
         // 6. 768×768ピクセル最適化 ＆ コントラスト強調(1.15) Canvas切り出しエンジン
         // ============================================================================
@@ -2137,6 +2557,7 @@
             const sy = Math.round(div(vh - sh, 2));
             return { sx: sx, sy: sy, sw: sw, sh: sh };
         }
+
         function captureOptimized768Frame(videoEl, targetCanvas) {
             isVisionCapturingNow = true;
             try {
@@ -2167,6 +2588,7 @@
                 isVisionCapturingNow = false;
             }
         }
+
         // ============================================================================
         // 7. 片耳Bluetoothイヤホン完全対応オーディオ＆0.8秒短縮コールサインエンジン
         // ============================================================================
@@ -2177,6 +2599,7 @@
         let ttsResumeInterval = null;
         let ttsQueue = [];
         let isTtsProcessing = false;
+
         function initSpeechVoices() {
             if (!('speechSynthesis' in window)) return;
             const load = () => {
@@ -2192,6 +2615,7 @@
             window.speechSynthesis.onvoiceschanged = load;
         }
         initSpeechVoices();
+
         function ensureAudioContext() {
             const AudioContextClass = window.AudioContext || window.webkitAudioContext;
             if (!AudioContextClass) return null;
@@ -2204,6 +2628,7 @@
             startBluetoothSubcarrierKeepAlive();
             return audioCtx;
         }
+
         // 片耳BluetoothイヤホンのDACが省電力スリープして冒頭音声が欠けるのを防ぐ20Hz極小サブキャリア
         function startBluetoothSubcarrierKeepAlive() {
             if (!audioCtx || btKeepAliveOsc) return;
@@ -2219,6 +2644,7 @@
                 btKeepAliveOsc = osc;
             } catch (e) {}
         }
+
         function unlockAudioEngine() {
             try {
                 const ctx = ensureAudioContext();
@@ -2242,6 +2668,7 @@
                 } catch (e) {}
             }
         }
+
         // 冒頭100msのDACウェイクアッププリアンブル付き電子チャイム合成
         function playAlertChime(status) {
             if (voiceModeSelect.value === 'mute') return;
@@ -2298,6 +2725,7 @@
                 }
             } catch (e) {}
         }
+
         function toggleShortCallsignMode() {
             unlockAudioEngine();
             isShortCallsignMode = !isShortCallsignMode;
@@ -2305,6 +2733,7 @@
             updateShortVoiceButtonUI();
             playAlertChime('PASS');
         }
+
         function updateShortVoiceButtonUI() {
             if (!cmdShortVoiceBtn) return;
             if (isShortCallsignMode) {
@@ -2315,6 +2744,7 @@
                 cmdShortVoiceBtn.classList.remove('active-purple');
             }
         }
+
         function formatShortCallsignText(res) {
             if (!res) return '';
             const shortModel = String(res.detected_model || res.item_category || '候補')
@@ -2331,6 +2761,7 @@
             }
             return 'スルー';
         }
+
         // 読点（、）での細切れ分割と再生中の強制一時停止を廃止した滑らか読み上げエンジン
         function speakGuideText(text, status, forceSpeak, appraisalObj) {
             const mode = voiceModeSelect.value;
@@ -2338,18 +2769,15 @@
             if (!forceSpeak && mode === 'treasure_only' && status === 'PASS') return;
             playAlertChime(status);
             if (!('speechSynthesis' in window)) return;
-
             const targetText = (isShortCallsignMode && appraisalObj)
                 ? formatShortCallsignText(appraisalObj)
                 : text;
             if (!targetText) return;
-
             const cleaned = String(targetText)
                 .replace(/[#\u002a\uff0a`_\-\[\]【】]/g, ' ')
                 .replace(/\s+/g, ' ')
                 .trim();
             if (!cleaned) return;
-
             const sentences = cleaned.match(/[^。！？\n]+[。！？\n]?/g) || [cleaned];
             const chunks = [];
             let buffer = '';
@@ -2364,22 +2792,20 @@
                 }
             }
             if (buffer) chunks.push(buffer);
-
             const speechRate = isShortCallsignMode ? 1.35 : 1.12;
             if (ttsWatchdogTimer) clearTimeout(ttsWatchdogTimer);
             if (ttsResumeInterval) clearInterval(ttsResumeInterval);
             ttsQueue = [];
             try { window.speechSynthesis.cancel(); } catch (e) {}
             isTtsProcessing = false;
-
             for (let i = 0; i < chunks.length; i++) {
                 ttsQueue.push({ text: chunks[i], rate: speechRate });
             }
-
             setTimeout(() => {
                 processNextTtsChunk();
             }, 180);
         }
+
         function processNextTtsChunk() {
             if (ttsQueue.length === 0) {
                 isTtsProcessing = false;
@@ -2387,7 +2813,6 @@
             }
             isTtsProcessing = true;
             const item = ttsQueue.shift();
-
             try {
                 const utter = new SpeechSynthesisUtterance(item.text);
                 utter.lang = 'ja-JP';
@@ -2396,25 +2821,23 @@
                 if (!selectedJaVoice) initSpeechVoices();
                 if (selectedJaVoice) utter.voice = selectedJaVoice;
                 window.__activeHunterUtterance = utter;
-
                 const advance = () => {
                     if (ttsWatchdogTimer) clearTimeout(ttsWatchdogTimer);
                     processNextTtsChunk();
                 };
                 utter.onend = advance;
                 utter.onerror = advance;
-
                 const timeoutMs = Math.max(6000, mul(item.text.length, 300) + 3000);
                 ttsWatchdogTimer = setTimeout(() => {
                     try { window.speechSynthesis.cancel(); } catch (e) {}
                     advance();
                 }, timeoutMs);
-
                 window.speechSynthesis.speak(utter);
             } catch (e) {
                 isTtsProcessing = false;
             }
         }
+
         function runSoundAndVoiceTest() {
             voiceModeSelect.value = 'treasure_only';
             localStorage.setItem('hunter_voice_v2', 'treasure_only');
@@ -2423,6 +2846,7 @@
             speakGuideText('サウンドテスト成功です！片耳Bluetoothイヤホンの無音スリープ防止と音声ガイドが正常に稼働しています！', 'TREASURE', true, null);
             cacheAuditText.innerText = '🔊 テスト発音を実行しました（Bluetoothサブキャリア起動済）';
         }
+
         function forceResetSystem() {
             unlockAudioEngine();
             isAnalyzing = false;
@@ -2432,18 +2856,51 @@
             statusDot.className = isAutoScan ? 'status-dot scanning' : 'status-dot';
             startCamera();
         }
+
         function clearSynergyMemory() {
             storeSynergyMemory = [];
             localStorage.removeItem('hunter_synergy_mem');
             cacheAuditText.innerText = '店内ニコイチ記憶をリセットしました（新しい店舗用）';
         }
+
         // ============================================================================
-        // 8. 端末側Canvas 3段階事前フィルター ＆ 64bit dHashリングバッファ（過去45枚重複棚カット）
+        // 8. 端末側Canvas 3段階事前フィルター・64bit dHash・3連写ピント合焦測定
         // ============================================================================
         const filterCanvas = document.createElement('canvas');
         filterCanvas.width = 320;
         filterCanvas.height = 240;
         const filterCtx = filterCanvas.getContext('2d', { willReadFrequently: true });
+
+        // クルクル3連写時、商品を裏返した直後の手ブレが止まってピントが合った瞬間を検知する高速測定関数
+        function measureInstantLaplacianSharpness(videoElement) {
+            if (!videoElement || !videoElement.videoWidth) return 999;
+            const w = 320;
+            const h = 240;
+            const crop = getSourceCropRect(videoElement);
+            filterCtx.drawImage(videoElement, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, w, h);
+            const imgData = filterCtx.getImageData(0, 0, w, h).data;
+            const gray = new Float32Array(76800);
+            for (let i = 0, j = 0; i < imgData.length; i += 4, j++) {
+                gray[j] = div(imgData[i], 3.34) + div(imgData[i + 1], 1.70) + div(imgData[i + 2], 8.77);
+            }
+            let lapSum = 0;
+            let lapSqSum = 0;
+            let count = 0;
+            // 商品が映っている画面中央領域（上下左右20%を除いた中心部）のピント合焦度を重点計測
+            for (let y = 48; y < 192; y++) {
+                const rowOffset = Math.imul(y, w);
+                for (let x = 64; x < 256; x++) {
+                    const idx = rowOffset + x;
+                    const lap = (gray[idx] << 2) - gray[idx - 1] - gray[idx + 1] - gray[idx - w] - gray[idx + w];
+                    lapSum += lap;
+                    lapSqSum += Math.pow(lap, 2);
+                    count++;
+                }
+            }
+            const mean = div(lapSum, count);
+            return div(lapSqSum, count) - Math.pow(mean, 2);
+        }
+
         function evaluateFrameGateways(videoElement) {
             const sensitivity = filterSensitivitySelect.value;
             if (sensitivity === 'off') {
@@ -2511,6 +2968,7 @@
             }
             return { passed: true, dHashBits: dHashBits };
         }
+
         function pushDHashToRingBuffer(dHashBits) {
             if (!dHashBits) return;
             dHashRingBuffer.push(dHashBits);
@@ -2518,6 +2976,7 @@
                 dHashRingBuffer.shift();
             }
         }
+
         function computeDHash64(gray, w, h) {
             const bits = new Uint8Array(64);
             let bitIdx = 0;
@@ -2535,6 +2994,7 @@
             }
             return bits;
         }
+
         function countHammingDistance(hashA, hashB) {
             let dist = 0;
             for (let i = 0; i < 64; i++) {
@@ -2542,6 +3002,7 @@
             }
             return dist;
         }
+
         // ============================================================================
         // 9. 括弧バランス自動補修パーサー（cleanupJSON）＆ Gemini 4 Argon / 3.8 Flash 専用エンジン
         // ============================================================================
@@ -2551,6 +3012,7 @@
         function getDynamicTrackingIntervalMs() {
             return proInFlightCount > 0 ? 4200 : 2300;
         }
+
         // Search Grounding併用時や長文出力時の閉じ括弧欠け・コードブロック混入を100%自動修復する
         function cleanupAndParseAiJson(rawText) {
             if (!rawText) return null;
@@ -2632,6 +3094,7 @@
                 line_message: cleaned
             };
         }
+
         function extractNonThoughtTextFromCandidate(data) {
             if (!data || !data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts) {
                 return '';
@@ -2648,6 +3111,22 @@
             }
             return rawText;
         }
+
+        function buildCornerAndBudgetInstruction() {
+            const cornerMap = {
+                'AUTO': '売場オート見極め（画像全体の棚・カゴ・商品の傾向から [青箱・コード] [工具・計測・基板] [音響・光学・楽器・ゲーム] [文具・鍋・銀・ホビー] のいずれかの売場を自動特定し、その売場の該当領域だけに視覚を100%集中せよ）',
+                'BLUE_BOX': '売場固定：青箱・ジャンク小箱・コード類（特殊ACアダプター、6N/7N/8Nケーブル、純正リモコン、ゲームD端子、Apple変換A1463、トーンアーム分銅・セラミックシェル、露出計、光学小物だけに100%集中せよ）',
+                'TOOLS_PC': '売場固定：電動工具・計測器・PC産業基板（マキタ・HiKOKIバッテリー、Snap-on・ネプロス、ミツトヨ・FLUKE・HIOKI・KEYENCE、Adaptec SCSI・レトロ基板・プローブだけに100%集中せよ）',
+                'AUDIO_OPT': '売場固定：オーディオ・カメラ光学・楽器・旧車（オールドレンズR刻印、メタルカセット、MCカートリッジ、BOSS銀ネジ黒ラベル、NARDI・MOMO・旧車1DINデッキだけに100%集中せよ）',
+                'KITCHEN_HOBBY': '売場固定：文具・高級鍋・純銀・ホビー・アウトドア（メカニカ・ロットリング・MYU・14K/18K万年筆、純銀SILVER925/950、アムウェイ・ビタクラフト・ストウブ・GLOBAL-PRO、廃番プラレール・超合金、コールマン2レバー・旧620だけに100%集中せよ）'
+            };
+            const cornerDesc = cornerMap[currentCornerFocusMode] || cornerMap['AUTO'];
+            const budgetDesc = currentBudgetCapYen > 0
+                ? `予算上限フィルタ発動中：仕入れ価格上限は【${currentBudgetCapYen.toLocaleString()}円】である。店頭値札が${currentBudgetCapYen}円を超える商品はすべてPASS（スルー）とし、${currentBudgetCapYen}円以下で買えて高利益が出る商品のみをTREASUREまたはCHANCEとせよ。`
+                : '予算上限：∞天井なし（全価格帯のお宝を対象とせよ）。';
+            return `${cornerDesc} ／ ${budgetDesc}`;
+        }
+
         async function callGeminiEngine({ base64FramesArray, stage, useGoogleSearch, extraInstruction }) {
             const apiKey = apiKeyInput.value.trim();
             const customModel = customModelInput.value.trim();
@@ -2672,21 +3151,26 @@
             }
 
             const recentBarcodeActive = (Date.now() - latestBarcodeInfo.detectedAt) < 15000;
+            const focusAndBudgetRule = buildCornerAndBudgetInstruction();
             let stageText = extraInstruction || (
                 stage === 'STAGE_1_PATROL'
                     ? '初期ワンチャン発見モード（Gemini 4 Argon頭脳）：遠目の視覚特徴からTREASUREまたはCHANCEの気配を高精度に特定し、追尾時に見分けられるよう輪ゴムや袋の色を含めてJSONのみを出力せよ。'
                     : '最終真贋・精密確定モード（Gemini 4 Argon頭脳）：集まったすべての材料画像（表・裏文字・先端・値札）を統合解析し、CHANCEで先延ばしせずTREASUREまたはPASSの最終結論をJSONのみで出力せよ。'
             );
+            stageText += ' ' + focusAndBudgetRule;
             if (useGoogleSearch) {
                 stageText += ' 余計な前置きやMarkdown記法を一切省き、純粋なJSONオブジェクトのみを出力せよ。';
             }
 
             const dynamicContextText = JSON.stringify({
                 scan_stage: stage,
+                corner_focus_mode: currentCornerFocusMode,
+                budget_cap_yen: currentBudgetCapYen,
                 store_name: storeNameInput.value.trim() || 'Recycle_Shop',
                 camera_zoom: StoreCameraController.targetZoom,
                 scanned_barcode: recentBarcodeActive ? latestBarcodeInfo : null,
                 synergy_memory: storeSynergyMemory.slice(-15),
+                local_rag_past_wins: cachedLocalRagSummary || 'なし',
                 stage_instruction: stageText
             });
 
@@ -2728,7 +3212,6 @@
                     if (useGoogleSearch) {
                         requestBody.tools = [{ googleSearch: {} }];
                     }
-
                     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent`;
                     const controller = new AbortController();
                     const timeoutId = setTimeout(() => controller.abort(), isArgon ? 45000 : 26000);
@@ -2742,7 +3225,6 @@
                         signal: controller.signal
                     });
                     clearTimeout(timeoutId);
-
                     if (!response.ok) {
                         if ((response.status === 429 || response.status === 503) && isArgon) {
                             proConsecutiveFailures++;
@@ -2752,17 +3234,23 @@
                         }
                         continue;
                     }
-
                     if (isArgon) proConsecutiveFailures = 0;
                     const data = await response.json();
                     if (data.usageMetadata) {
                         const promptTokens = data.usageMetadata.promptTokenCount || 0;
                         const cachedTokens = data.usageMetadata.cachedContentTokenCount || 0;
-                        cacheAuditText.innerText = `直近通信 [${modelId}] 入力:${promptTokens}tok / キャッシュ:${cachedTokens}tok`;
+                        const discountBadge = cachedTokens > 0 ? '⚡90-95%割引発動中' : '初回キャッシュ構築済';
+                        cacheAuditText.innerText = `直近通信 [${modelId}] 入力:${promptTokens}tok / キャッシュ:${cachedTokens}tok (${discountBadge})`;
                     }
                     const rawText = extractNonThoughtTextFromCandidate(data);
                     if (rawText) {
-                        return cleanupAndParseAiJson(rawText);
+                        const parsed = cleanupAndParseAiJson(rawText);
+                        // くるくる金額上限が設定されており、店頭値札が読み取れていて上限を超えている場合はアプリ側でも確実にPASSへ落とす
+                        if (parsed && currentBudgetCapYen > 0 && parsed.store_price_yen > currentBudgetCapYen) {
+                            parsed.status = 'PASS';
+                            parsed.line_message = `【上限超過スルー】店頭値札(${parsed.store_price_yen}円)が設定上限(${currentBudgetCapYen}円)を超えています。\n` + (parsed.line_message || '');
+                        }
+                        return parsed;
                     }
                 } catch (e) {
                 } finally {
@@ -2824,6 +3312,7 @@
                 executeFlashTrackingTick();
             }, 600);
         }
+
         function stopTargetTrackingMode() {
             trackingState.active = false;
             if (trackingState.timerId) {
@@ -2837,6 +3326,7 @@
             pipStateLabel.innerText = isAutoScan ? '📦青箱探索中' : '待機中(タップ拡大)';
             savePinnedStateToDB();
         }
+
         async function executeFlashTrackingTick() {
             if (!trackingState.active || trackingState.busy || isSpinCapturing) return;
             const nowMs = Date.now();
@@ -2924,6 +3414,7 @@
                 trackingState.busy = false;
             }
         }
+
         // 外れ商品の裏Argon自動横流し鑑定（独立Canvas描画で非同期競合ゼロ）
         async function runBackgroundArgonPassThrough(cleanDataUrl) {
             try {
@@ -2948,7 +3439,10 @@
                         false,
                         null,
                         false,
-                        '🔥【さっき手に取った外れ商品が確定お宝でした！】'
+                        '🔥【さっき手に取った外れ商品が確定お宝でした！】',
+                        [cleanDataUrl],
+                        0,
+                        null
                     );
                     speakGuideText(`緊急お宝速報！さっき手に取って戻した別の商品が、実は${res.estimated_net_profit_yen || 2000}円利益の確定お宝でした！吹き出しの回収モードを押して拾い直して！`, 'TREASURE', true, res);
                 } else if (res.status === 'CHANCE') {
@@ -2959,17 +3453,45 @@
                         false,
                         null,
                         false,
-                        '🎯【横流し検知：別のワンチャン候補】'
+                        '🎯【横流し検知：別のワンチャン候補】',
+                        [cleanDataUrl],
+                        0,
+                        null
                     );
                 }
             } catch (e) {}
         }
+
         // ============================================================================
-        // 11. 🌀 シャッター不要「クルクル3連写 ➔ 材料揃いました（裏で非同期Argon確定鑑定）」
+        // 11. 🌀 クルクル3連写（ピント合焦スマートシャッター＆3枚全画像保持＆裏Argon確定鑑定）
         // ============================================================================
         function sleepMs(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
+
+        // 商品を裏返したあと、手の動きが止まってピントが合った瞬間（または最大900ms経過時）に一番鮮明なフレームを切り出す
+        async function waitForSharpFrameAndCapture(videoEl, targetCanvas, stepLabelPrefix) {
+            const sensitivity = filterSensitivitySelect.value;
+            const targetSharpness = sensitivity === 'low' ? 75.0 : 125.0;
+            let bestScore = -1;
+            let bestUrl = '';
+            const maxChecks = 6;
+            for (let c = 0; c < maxChecks; c++) {
+                const score = measureInstantLaplacianSharpness(videoEl);
+                const candidateUrl = captureOptimized768Frame(videoEl, targetCanvas);
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestUrl = candidateUrl;
+                }
+                if (score >= targetSharpness || sensitivity === 'off') {
+                    return bestUrl;
+                }
+                spinOverlayBar.innerText = `${stepLabelPrefix} (ピント合焦待機中...)`;
+                await sleepMs(150);
+            }
+            return bestUrl || captureOptimized768Frame(videoEl, targetCanvas);
+        }
+
         async function startSpin3CaptureAppraisal() {
             unlockAudioEngine();
             const apiKey = apiKeyInput.value.trim();
@@ -3003,9 +3525,9 @@
                 for (let i = 0; i < 3; i++) {
                     spinOverlayBar.innerText = stepLabels[i];
                     pipStateLabel.innerText = `🌀連写 ${i + 1}/3`;
-                    await sleepMs(1250);
+                    await sleepMs(1150);
+                    const frameUrl = await waitForSharpFrameAndCapture(mainVideo, captureCanvas, stepLabels[i]);
                     playAlertChime('PASS');
-                    const frameUrl = captureOptimized768Frame(mainVideo, captureCanvas);
                     capturedCleanUrls.push(frameUrl);
                     capturedBase64s.push(frameUrl.split(',')[1]);
                 }
@@ -3050,7 +3572,19 @@
                     const badgeTitle = res.status === 'TREASURE'
                         ? `🔔【#${currentJobId} クルクル鑑定結果：🔥お宝確定！】`
                         : `🔔【#${currentJobId} クルクル鑑定結果：スルー確定】`;
-                    renderPartnerAppraisal(capturedCleanUrls[0], capturedCleanUrls[0], res, true, null, false, badgeTitle);
+                    // 1枚目には店頭の値札が映っている可能性が高いため、3連写の3枚すべてを渡し、ワンタップでメイン画像切替＆ZIP全同梱できるようにする
+                    renderPartnerAppraisal(
+                        capturedCleanUrls[0],
+                        capturedCleanUrls[0],
+                        res,
+                        true,
+                        null,
+                        false,
+                        badgeTitle,
+                        capturedCleanUrls,
+                        0,
+                        null
+                    );
                     const resultVoice = res.status === 'TREASURE'
                         ? `ナンバー${currentJobId}の鑑定結果が出ました！大当たりのお宝確定です！${res.voice_guide || ''}`
                         : `ナンバー${currentJobId}の鑑定結果が出ました。こちらは利益が出ないためスルーで大丈夫です。`;
@@ -3062,6 +3596,7 @@
                 }
             })();
         }
+
         function appendSelfSpin3PhotosMessage(urlsArray, jobId) {
             const row = document.createElement('div');
             row.className = 'msg-row self';
@@ -3069,7 +3604,7 @@
             row.innerHTML = `
                 <div class="msg-bubble-wrap" style="align-items:flex-end;">
                     <div class="msg-bubble" style="padding:7px 9px;">
-                        <div style="font-size:0.75rem; font-weight:bold; margin-bottom:4px;">🌀 #${jobId} 材料3連写送信済（裏で鑑定中...）</div>
+                        <div style="font-size:0.75rem; font-weight:bold; margin-bottom:4px;">🌀 #${jobId} 材料3連写送信済（ピント合焦シャッター・裏で鑑定中...）</div>
                         <div style="display:flex; gap:4px;">${imgsHtml}</div>
                     </div>
                 </div>
@@ -3077,6 +3612,7 @@
             chatMessages.appendChild(row);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
+
         // ============================================================================
         // 12. 通常パトロール＆1枚手動ピンポイント鑑定サイクル
         // ============================================================================
@@ -3085,6 +3621,7 @@
             playAlertChime('PASS');
             executeHunterCycle(true);
         }
+
         async function executeHunterCycle(isManual) {
             const apiKey = apiKeyInput.value.trim();
             if (!apiKey) {
@@ -3133,7 +3670,7 @@
                     recordSynergyNodeIfAny(stage1Res);
                     if (stage1Res.status === 'PASS') {
                         if (voiceModeSelect.value === 'all') {
-                            renderPartnerAppraisal(cleanDataUrl, cleanDataUrl, stage1Res, false, null, false, '');
+                            renderPartnerAppraisal(cleanDataUrl, cleanDataUrl, stage1Res, false, null, false, '', [cleanDataUrl], 0, null);
                             speakGuideText(stage1Res.voice_guide || 'スルー推奨です', 'PASS', false, stage1Res);
                         }
                         return;
@@ -3157,7 +3694,7 @@
                         return;
                     }
                     const annotatedDataUrl = await drawTargetBoxOnDataUrl(cleanDataUrl, finalResult.target_box, finalResult.status);
-                    renderPartnerAppraisal(annotatedDataUrl, cleanDataUrl, finalResult, isManual, null, false, '');
+                    renderPartnerAppraisal(annotatedDataUrl, cleanDataUrl, finalResult, isManual, null, false, '', [cleanDataUrl], 0, null);
                     speakGuideText(finalResult.voice_guide || finalResult.line_message, finalResult.status, isManual, finalResult);
                     sendTelemetryAndSyncSynergyWithGAS(finalResult, annotatedDataUrl);
                 }
@@ -3172,6 +3709,7 @@
                 }
             }
         }
+
         function recordSynergyNodeIfAny(res) {
             if (res && res.synergy_role && res.synergy_role.is_part_or_incomplete && res.detected_model) {
                 const newNode = {
@@ -3188,6 +3726,7 @@
                 localStorage.setItem('hunter_synergy_mem', JSON.stringify(storeSynergyMemory));
             }
         }
+
         function mergeSharedSynergyMemory(remoteList) {
             if (!Array.isArray(remoteList)) return;
             const existingIds = new Set(storeSynergyMemory.map(item => item.id));
@@ -3203,8 +3742,9 @@
             }
             localStorage.setItem('hunter_synergy_mem', JSON.stringify(storeSynergyMemory));
         }
+
         // ============================================================================
-        // 13. 独立CanvasによるAR赤枠描画・テスター30秒検品シミュレータ統合パネル
+        // 13. 独立Canvas赤枠描画・3連写画像切替＆再撮影・テスター30秒検品パネル
         // ============================================================================
         function drawTargetBoxOnDataUrl(sourceCleanDataUrl, box, status) {
             return new Promise((resolve) => {
@@ -3248,6 +3788,7 @@
                 img.src = sourceCleanDataUrl;
             });
         }
+
         function appendSelfPhotoMessage(dataUrl) {
             const row = document.createElement('div');
             row.className = 'msg-row self';
@@ -3259,6 +3800,72 @@
             chatMessages.appendChild(row);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
+
+        // 3連写した3枚のうち、値札が写っていない写真をワンタップでメイン出品画像に切り替える関数
+        function selectMainSpinPhoto(recordId, photoIdx) {
+            unlockAudioEngine();
+            const item = appraisalRecordMap[recordId];
+            if (!item || !Array.isArray(item.spinCleanUrls) || !item.spinCleanUrls[photoIdx]) return;
+            item.selectedPhotoIdx = photoIdx;
+            item.cleanDataUrl = item.spinCleanUrls[photoIdx];
+            const mainImgEl = document.getElementById('mainBubblePhoto_' + recordId);
+            if (mainImgEl) {
+                mainImgEl.src = item.cleanDataUrl;
+            }
+            for (let i = 0; i < item.spinCleanUrls.length; i++) {
+                const thumbEl = document.getElementById(`spinThumb_${recordId}_${i}`);
+                if (thumbEl) {
+                    if (i === photoIdx) {
+                        thumbEl.classList.add('active-main-photo');
+                    } else {
+                        thumbEl.classList.remove('active-main-photo');
+                    }
+                }
+            }
+            autoSaveChatBubbleToDB(item);
+            playAlertChime('PASS');
+        }
+
+        // 値札を剥がした後や自宅で、出品用の綺麗な写真を現在のカメラ映像から即座に撮り直して差し替える関数
+        async function retakeCleanPhotoForRecord(recordId) {
+            unlockAudioEngine();
+            const item = appraisalRecordMap[recordId];
+            if (!item) return;
+            if (!mainVideo.videoWidth) {
+                await startCamera();
+            }
+            const newCleanUrl = captureOptimized768Frame(mainVideo, captureCanvas);
+            if (!Array.isArray(item.spinCleanUrls)) {
+                item.spinCleanUrls = [];
+            }
+            item.spinCleanUrls.unshift(newCleanUrl);
+            if (item.spinCleanUrls.length > 3) {
+                item.spinCleanUrls = item.spinCleanUrls.slice(0, 3);
+            }
+            item.selectedPhotoIdx = 0;
+            item.cleanDataUrl = newCleanUrl;
+            item.annotatedDataUrl = newCleanUrl;
+            const mainImgEl = document.getElementById('mainBubblePhoto_' + recordId);
+            if (mainImgEl) {
+                mainImgEl.src = newCleanUrl;
+            }
+            const selectorWrap = document.getElementById('spinThumbWrap_' + recordId);
+            if (selectorWrap) {
+                selectorWrap.innerHTML = buildSpinThumbnailsHtml(recordId, item.spinCleanUrls, 0);
+            }
+            autoSaveChatBubbleToDB(item);
+            playAlertChime('TREASURE');
+        }
+
+        function buildSpinThumbnailsHtml(recordId, urlsArray, activeIdx) {
+            const safeUrls = (Array.isArray(urlsArray) && urlsArray.length > 0) ? urlsArray : [];
+            const thumbs = safeUrls.map((u, idx) => {
+                const activeClass = (idx === activeIdx) ? 'active-main-photo' : '';
+                return `<img id="spinThumb_${recordId}_${idx}" src="${u}" class="spin-thumb-item ${activeClass}" onclick="selectMainSpinPhoto('${recordId}', ${idx})" title="${idx + 1}枚目をメイン出品画像にする">`;
+            }).join('');
+            return `${thumbs}<button type="button" class="retake-clean-btn" onclick="retakeCleanPhotoForRecord('${recordId}')">📷 値札なし再撮影</button>`;
+        }
+
         // テスター（デジタルマルチメーター）30秒検品判定＆出品保証テキスト自動生成関数
         function applyDmmInspectionSimulator(recordId) {
             unlockAudioEngine();
@@ -3314,6 +3921,7 @@
             updateDraftPreviewWithTesterNote(recordId);
             playAlertChime('TREASURE');
         }
+
         function buildPersonalNaturalDescription(cleanTitle, cleanDesc, pseShipType, testerNote) {
             let text = (cleanDesc || '')
                 .replace(/当店/g, '自宅')
@@ -3328,7 +3936,8 @@
             }
             return `${cleanTitle}\n\n${text}${noteLine}\n${shipNote}`;
         }
-        function renderPartnerAppraisal(annotatedDataUrl, cleanDataUrl, res, isManual, existingRecordId, isRestoring, extraBadgeText) {
+
+        function renderPartnerAppraisal(annotatedDataUrl, cleanDataUrl, res, isManual, existingRecordId, isRestoring, extraBadgeText, spinCleanUrls, selectedPhotoIdx, restoredDraftInputs) {
             const partnerName = partnerNameInput.value.trim() || '肇晃';
             const isCorporate = operationModeSelect.value === 'corporate';
             let badgeHtml = '<div class="badge-chance">🎯 ワンチャン・候補</div>';
@@ -3337,6 +3946,15 @@
             } else if (res.status === 'PASS') {
                 badgeHtml = '<div class="badge-pass">スルー</div>';
             }
+            const cornerLabelMap = {
+                'AUTO': '🤖売場オート',
+                'BLUE_BOX': '📦青箱集中',
+                'TOOLS_PC': '🔧工具基板',
+                'AUDIO_OPT': '🎸音響光学',
+                'KITCHEN_HOBBY': '✒️文具鍋銀'
+            };
+            const budgetLabel = currentBudgetCapYen > 0 ? `上限${currentBudgetCapYen.toLocaleString()}円` : '上限なし';
+            badgeHtml += `<span class="badge-corner-tag">${cornerLabelMap[currentCornerFocusMode] || '🤖オート'} / ${budgetLabel}</span>`;
             if (extraBadgeText) {
                 badgeHtml = `<div class="badge-bg-pass-through">${extraBadgeText}</div><br>` + badgeHtml;
             }
@@ -3350,10 +3968,11 @@
             if (res.estimated_net_profit_yen > 0) priceInfo.push(`想定純利益: +${res.estimated_net_profit_yen.toLocaleString()}円`);
             const summaryBlock = [
                 `【${res.item_category || '鑑定'}】${res.detected_model || ''}`,
-                 res.visual_cue_matched ? `目印: ${res.visual_cue_matched}` : '',
+                res.visual_cue_matched ? `目印: ${res.visual_cue_matched}` : '',
                 priceInfo.join(' ／ '),
                 res.line_message || res.voice_guide || ''
             ].filter(Boolean).join('\n').replace(/[\u002a\uff0a]/g, '');
+
             const recordId = existingRecordId || ('rec_' + Date.now() + '_' + Math.floor(mul(Math.random(), 1000)));
             const cleanTitle = (res.listing_draft && res.listing_draft.title)
                 ? res.listing_draft.title.replace(/[\u002a\uff0a]/g, '').normalize('NFKC').substring(0, 65)
@@ -3364,11 +3983,28 @@
             const recPrice = (res.listing_draft && res.listing_draft.recommended_price)
                 ? res.listing_draft.recommended_price
                 : (res.max_buy_price_yen > 0 ? Math.round(mul(res.max_buy_price_yen, 2.2)) : 3980);
-            const defaultBuyPrice = res.store_price_yen > 0 ? res.store_price_yen : (res.max_buy_price_yen || 550);
-            const defaultSerialFeature = (res.detected_serial_or_feature || res.visual_cue_matched || '外観スレ小・特徴確認済').replace(/[\u002a\uff0a]/g, '');
-            const defaultJan = latestBarcodeInfo.makerJan || '';
-            const pseShipType = res.pse_and_shipping_type || 'STANDARD_NO_BATTERY';
-            const personalDesc = buildPersonalNaturalDescription(cleanTitle, cleanDesc, pseShipType, '');
+            const defaultBuyPrice = (restoredDraftInputs && restoredDraftInputs.buyPrice !== '')
+                ? restoredDraftInputs.buyPrice
+                : (res.store_price_yen > 0 ? res.store_price_yen : (res.max_buy_price_yen || 550));
+            const defaultSellPrice = (restoredDraftInputs && restoredDraftInputs.sellPrice !== '')
+                ? restoredDraftInputs.sellPrice
+                : recPrice;
+            const defaultTesterNote = (restoredDraftInputs && restoredDraftInputs.testerNote) ? restoredDraftInputs.testerNote : '';
+            const defaultSerialFeature = (restoredDraftInputs && restoredDraftInputs.serialFeat)
+                ? restoredDraftInputs.serialFeat
+                : (res.detected_serial_or_feature || res.visual_cue_matched || '外観スレ小・特徴確認済').replace(/[\u002a\uff0a]/g, '');
+            const defaultJan = (restoredDraftInputs && restoredDraftInputs.janCode)
+                ? restoredDraftInputs.janCode
+                : (latestBarcodeInfo.makerJan || '');
+            const pseShipType = (restoredDraftInputs && restoredDraftInputs.pseShip)
+                ? restoredDraftInputs.pseShip
+                : (res.pse_and_shipping_type || 'STANDARD_NO_BATTERY');
+
+            const allCleanUrls = (Array.isArray(spinCleanUrls) && spinCleanUrls.length > 0) ? spinCleanUrls : [cleanDataUrl];
+            const activeIdx = (typeof selectedPhotoIdx === 'number' && allCleanUrls[selectedPhotoIdx]) ? selectedPhotoIdx : 0;
+            const currentMainCleanUrl = allCleanUrls[activeIdx] || cleanDataUrl;
+            const personalDesc = buildPersonalNaturalDescription(cleanTitle, cleanDesc, pseShipType, defaultTesterNote);
+
             appraisalRecordMap[recordId] = {
                 recordId: recordId,
                 createdMs: Date.now(),
@@ -3376,35 +4012,46 @@
                 cleanTitle: cleanTitle,
                 cleanDesc: cleanDesc,
                 personalDesc: personalDesc,
-                testerNote: '',
+                testerNote: defaultTesterNote,
                 recPrice: recPrice,
                 annotatedDataUrl: annotatedDataUrl,
-                cleanDataUrl: cleanDataUrl,
-                extraBadgeText: extraBadgeText || ''
+                cleanDataUrl: currentMainCleanUrl,
+                spinCleanUrls: allCleanUrls,
+                selectedPhotoIdx: activeIdx,
+                extraBadgeText: extraBadgeText || '',
+                draftInputs: restoredDraftInputs || null
             };
             if (!isRestoring) {
                 autoSaveChatBubbleToDB(appraisalRecordMap[recordId]);
             }
+
+            const spinThumbsHtml = `<div class="spin-thumb-selector" id="spinThumbWrap_${recordId}">${buildSpinThumbnailsHtml(recordId, allCleanUrls, activeIdx)}</div>`;
+
             let trackingBtnHtml = '';
             if (res.status === 'CHANCE') {
                 trackingBtnHtml = `<button type="button" class="track-start-btn" onclick="startTargetTrackingMode('${recordId}', 'FIND_CHANCE', false)">🎯 この候補をFlash追尾で探す（他を一時停止）</button>`;
             } else if (res.status === 'TREASURE') {
                 trackingBtnHtml = `<button type="button" class="track-start-btn recover" onclick="startTargetTrackingMode('${recordId}', 'RECOVER_TREASURE', false)">🔥 カゴに戻した場合はここをタップ（確定品の回収追尾）</button>`;
             }
+
             let actionPanelHtml = '';
             if (res.status !== 'PASS' || isManual) {
                 const corpDisplay = isCorporate ? 'block' : 'none';
+                const isPanelInitiallyOpen = Boolean(restoredDraftInputs && restoredDraftInputs.panelOpen);
+                const keepBtnDisplay = isPanelInitiallyOpen ? 'none' : 'block';
+                const panelDisplay = isPanelInitiallyOpen ? 'block' : 'none';
                 const btnLabel = isCorporate
                     ? '📝 確保完了（古物台帳・出品ドラフト展開）'
                     : '🎁 確保完了（フリマ出品コピー・写真保存・利益記録）';
+                const estShipYen = estimateOptimalShippingCostYen(res.item_category || '', res.detected_model || '', pseShipType);
                 actionPanelHtml = `
                     ${trackingBtnHtml}
-                    <button type="button" class="keep-btn" onclick="openPurchaseConfirmPanel('${recordId}', this)">${btnLabel}</button>
-                    <div id="panel_${recordId}" class="ledger-box">
+                    <button type="button" class="keep-btn" style="display:${keepBtnDisplay};" onclick="openPurchaseConfirmPanel('${recordId}', this)">${btnLabel}</button>
+                    <div id="panel_${recordId}" class="ledger-box" style="display:${panelDisplay};">
                         <div class="quick-action-grid">
                             <button type="button" class="quick-btn primary" onclick="copyTextToClipboard('${recordId}', 'title', this)">📋 タイトルをコピー</button>
                             <button type="button" class="quick-btn primary" onclick="copyTextToClipboard('${recordId}', 'desc', this)">📋 説明文をコピー</button>
-                            <button type="button" class="quick-btn accent" onclick="downloadCleanPhoto('${recordId}')">📷 綺麗な写真を保存</button>
+                            <button type="button" class="quick-btn accent" onclick="downloadCleanPhoto('${recordId}')">📷 選択中の写真を保存</button>
                             <button type="button" class="quick-btn" onclick="openStockManagerModal()">📦 ストック一覧を見る</button>
                         </div>
                         <div class="dmm-sim-box">
@@ -3423,23 +4070,23 @@
                             </div>
                             <button type="button" class="dmm-apply-btn" onclick="applyDmmInspectionSimulator('${recordId}')">⚡ テスター実測判定＆保証文を説明欄へ自動挿入</button>
                         </div>
-                        <label>検品追記・自由メモ（手動編集も即座に説明文へ反映）</label>
-                        <input type="text" id="testerNote_${recordId}" placeholder="例：テスターにてDC19.5V出力確認済・導通OK" oninput="updateDraftPreviewWithTesterNote('${recordId}')">
-                        <label>仕入れ税込価格（円） ／ 出品予定売価（円）</label>
+                        <label>検品追記・自由メモ（入力と同時に説明文＆💾オートセーブへ反映）</label>
+                        <input type="text" id="testerNote_${recordId}" value="${defaultTesterNote}" placeholder="例：テスターにてDC19.5V出力確認済・導通OK" oninput="updateDraftPreviewWithTesterNote('${recordId}')">
+                        <label>仕入れ税込価格（円） ／ 出品予定売価（円） ※自動判定送料:${estShipYen}円</label>
                         <div style="display:flex; gap:6px;">
-                            <input type="number" id="buyPrice_${recordId}" value="${defaultBuyPrice}" inputmode="numeric" style="width:50%;" placeholder="仕入値">
-                            <input type="number" id="sellPrice_${recordId}" value="${recPrice}" inputmode="numeric" style="width:50%;" placeholder="売価">
+                            <input type="number" id="buyPrice_${recordId}" value="${defaultBuyPrice}" inputmode="numeric" style="width:50%;" placeholder="仕入値" oninput="triggerRealtimeDraftAutosave('${recordId}')">
+                            <input type="number" id="sellPrice_${recordId}" value="${defaultSellPrice}" inputmode="numeric" style="width:50%;" placeholder="売価" oninput="triggerRealtimeDraftAutosave('${recordId}')">
                         </div>
                         <label>出品先の分散予定メモ（1箇所集中による制限防止） ＆ 商品状態</label>
                         <div style="display:flex; gap:6px;">
-                            <select id="marketTarget_${recordId}" style="width:52%;">
+                            <select id="marketTarget_${recordId}" style="width:52%;" onchange="triggerRealtimeDraftAutosave('${recordId}')">
                                 <option value="メルカリ(個人)" ${pseShipType === 'LITHIUM_BATTERY_LAND_ONLY' ? '' : 'selected'}>メルカリ（個人）</option>
                                 <option value="ヤフオク(個人)" ${pseShipType === 'LITHIUM_BATTERY_LAND_ONLY' ? 'selected' : ''}>ヤフオク（バッテリー可）</option>
                                 <option value="Yahoo!フリマ">Yahoo!フリマ</option>
                                 <option value="楽天ラクマ">楽天ラクマ</option>
                                 <option value="法人CSV/ZIP一括">法人CSV/ZIP一括</option>
                             </select>
-                            <select id="itemCond_${recordId}" style="width:48%;">
+                            <select id="itemCond_${recordId}" style="width:48%;" onchange="triggerRealtimeDraftAutosave('${recordId}')">
                                 <option value="1">1: 新品、未使用</option>
                                 <option value="2">2: 未使用に近い</option>
                                 <option value="3" selected>3: 目立った傷なし</option>
@@ -3450,11 +4097,11 @@
                         </div>
                         <div id="corpFields_${recordId}" style="display:${corpDisplay};">
                             <label>個体特徴・シリアル製造番号（古物台帳 様式15号 E列）</label>
-                            <input type="text" id="serialFeat_${recordId}" value="${defaultSerialFeature}" placeholder="色・型番・シリアルNo・傷の特徴">
+                            <input type="text" id="serialFeat_${recordId}" value="${defaultSerialFeature}" placeholder="色・型番・シリアルNo・傷の特徴" oninput="triggerRealtimeDraftAutosave('${recordId}')">
                             <label>メーカーJAN / ISBN（13桁） ＆ PSE・危険物発送区分</label>
                             <div style="display:flex; gap:6px;">
-                                <input type="text" id="janCode_${recordId}" value="${defaultJan}" style="width:45%;" placeholder="45/49/978始まり">
-                                <select id="pseShip_${recordId}" style="width:55%;">
+                                <input type="text" id="janCode_${recordId}" value="${defaultJan}" style="width:45%;" placeholder="45/49/978始まり" oninput="triggerRealtimeDraftAutosave('${recordId}')">
+                                <select id="pseShip_${recordId}" style="width:55%;" onchange="triggerRealtimeDraftAutosave('${recordId}')">
                                     <option value="STANDARD_NO_BATTERY" ${pseShipType === 'STANDARD_NO_BATTERY' ? 'selected' : ''}>標準（電池・燃料なし）</option>
                                     <option value="LITHIUM_BATTERY_LAND_ONLY" ${pseShipType === 'LITHIUM_BATTERY_LAND_ONLY' ? 'selected' : ''}>リチウム電池（ヤマト陸送・ヤフオク専用）</option>
                                     <option value="PSE_AC_ADAPTER" ${pseShipType === 'PSE_AC_ADAPTER' ? 'selected' : ''}>ACアダプター（PSE確認文言付与）</option>
@@ -3462,7 +4109,7 @@
                                 </select>
                             </div>
                             <label>古物営業法・インボイス確認区分（様式15号 H列・P列）</label>
-                            <select id="invoiceType_${recordId}">
+                            <select id="invoiceType_${recordId}" onchange="triggerRealtimeDraftAutosave('${recordId}')">
                                 <option value="古物商特例_店舗領収書・レシート保管" selected>店舗領収書・レシート保管（古物商特例・7年保存）</option>
                                 <option value="適格簡易請求書_インボイス登録番号付レシート">適格簡易請求書（T番号レシートあり）</option>
                                 <option value="本人確認書類確認済_1万円以上または2025改正特定8品目">本人確認済（1万円以上・2025年10月改正特定8品目）</option>
@@ -3474,13 +4121,14 @@
                     </div>
                 `;
             }
+
             const row = document.createElement('div');
             row.className = 'msg-row';
             row.innerHTML = `
                 <div class="msg-avatar">👤</div>
                 <div class="msg-bubble-wrap">
                     <div class="msg-sender-name">${partnerName}</div>
-                    <div class="msg-bubble"><img src="${annotatedDataUrl}" class="msg-photo" alt="対象商品" onclick="startTargetTrackingMode('${recordId}', '${res.status === 'TREASURE' ? 'RECOVER_TREASURE' : 'FIND_CHANCE'}', false)">${badgeHtml}${backyardAlertHtml}\n${summaryBlock}${actionPanelHtml}</div>
+                    <div class="msg-bubble"><img id="mainBubblePhoto_${recordId}" src="${annotatedDataUrl}" class="msg-photo" alt="対象商品" onclick="startTargetTrackingMode('${recordId}', '${res.status === 'TREASURE' ? 'RECOVER_TREASURE' : 'FIND_CHANCE'}', false)">${spinThumbsHtml}${badgeHtml}${backyardAlertHtml}\n${summaryBlock}${actionPanelHtml}</div>
                 </div>
             `;
             chatMessages.appendChild(row);
@@ -3492,6 +4140,7 @@
                 }
             }
         }
+
         function updateDraftPreviewWithTesterNote(recordId) {
             const item = appraisalRecordMap[recordId];
             if (!item) return;
@@ -3506,7 +4155,9 @@
                 const baseCorp = noteText ? `${item.cleanDesc}\n・実測検品メモ：${noteText}` : item.cleanDesc;
                 previewEl.innerText = `【タイトル】\n${item.cleanTitle}\n\n【説明文】\n${isCorporate ? baseCorp : item.personalDesc}`;
             }
+            triggerRealtimeDraftAutosave(recordId);
         }
+
         function openPurchaseConfirmPanel(recordId, btnEl) {
             unlockAudioEngine();
             const panel = document.getElementById('panel_' + recordId);
@@ -3516,8 +4167,10 @@
             if (btnEl) {
                 btnEl.style.display = 'none';
             }
+            triggerRealtimeDraftAutosave(recordId);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
+
         async function copyTextToClipboard(recordId, fieldType, btnEl) {
             unlockAudioEngine();
             const item = appraisalRecordMap[recordId];
@@ -3544,21 +4197,41 @@
                 btnEl.innerText = '✅ コピー完了！';
             }
         }
+
         function downloadCleanPhoto(recordId) {
             unlockAudioEngine();
             const item = appraisalRecordMap[recordId];
             if (!item || !item.cleanDataUrl) return;
             const a = document.createElement('a');
             a.href = item.cleanDataUrl;
-            a.download = `item_${recordId}.jpg`;
+            a.download = `item_${recordId}_main.jpg`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             playAlertChime('PASS');
         }
+
         // ============================================================================
-        // 14. 確保ストック保存・2025年10月改正特定8品目判定・GAS双方向同期
+        // 14. 確保ストック保存・サイズ別送料自動判定・2025年10月改正特定8品目・GAS同期
         // ============================================================================
+        // 小型パーツ（ケーブル・リモコン・万年筆・ヘッドシェル・分銅・ベアリング等）の送料を210円（ネコポス）で正確に計算する
+        function estimateOptimalShippingCostYen(categoryText, modelText, pseShipType) {
+            const combined = `${categoryText} ${modelText}`.toUpperCase();
+            if (pseShipType === 'LITHIUM_BATTERY_LAND_ONLY' || pseShipType === 'CAMP_STOVE_FUEL_DRAINED') {
+                return 750;
+            }
+            if (/(ステアリング|NARDI|MOMO|シチューパン|両手鍋|フライパン|ストウブ|STAUB|ビタクラフト|アムウェイ|インパクト|1DIN|2DIN|スピーカー|TS-X|ランタン|200A|286A)/.test(combined)) {
+                return 750;
+            }
+            if (/(レンズ|TAKUMAR|NIKKOR|ROKKOR|エフェクター|OD-1|CE-2|DM-2|RAT|マルチメータ|FLUKE|HIOKI|包丁|GLOBAL|UX10|グレステン|アダプタ|電源|ハンマー|PRO\.C)/.test(combined)) {
+                return 520;
+            }
+            if (/(ケーブル|コード|6N|7N|PA-02|BELDEN|A1463|MD464ZM|USB-|OPC-|DOL-009|リモコン|カセット|MA-R|MA-XG|カートリッジ|DL-103|ヘッドシェル|ULS-|SH-4|サブウェイト|W-7H|SME|消磁器|AH-301|露出計|L-308|L-398|DR-6|フード|12585|プローブ|P6139|TL175|ノギス|ミツトヨ|万年筆|MYU|メカニカ|ロットリング|PG1|PG2|SH-1500|ベアリング|620|純銀|カトラリー|ラチェット|SNAP-ON|ネプロス|PB SWISS|ROM|カード)/.test(combined)) {
+                return 210;
+            }
+            return 520;
+        }
+
         function check2025KobutsuSpecial8Items(categoryText, modelText, buyYen) {
             const combined = `${categoryText} ${modelText}`;
             if (buyYen >= 10000) {
@@ -3576,6 +4249,7 @@
             }
             return '古物商特例・全件1品1行記録';
         }
+
         async function confirmAndSavePurchase(recordId) {
             unlockAudioEngine();
             const itemData = appraisalRecordMap[recordId];
@@ -3590,6 +4264,7 @@
             const invoiceEl = document.getElementById('invoiceType_' + recordId);
             const condEl = document.getElementById('itemCond_' + recordId);
             const submitBtn = document.getElementById('submitBtn_' + recordId);
+
             const actualBuyYen = parseInt(buyPriceEl.value, 10) || 0;
             const targetSellYen = parseInt(sellPriceEl.value, 10) || itemData.recPrice || 0;
             const marketTarget = marketTargetEl ? marketTargetEl.value : 'メルカリ(個人)';
@@ -3599,8 +4274,15 @@
             const pseShippingType = pseShipEl ? pseShipEl.value : (itemData.appraisal.pse_and_shipping_type || 'STANDARD_NO_BATTERY');
             const invoiceVerification = invoiceEl ? invoiceEl.value : '古物商特例_店舗領収書・レシート保管';
             const conditionCode = parseInt(condEl.value, 10) || 3;
+
             const feeRate = marketTarget.includes('Yahoo!フリマ') ? 0.95 : 0.90;
-            const estProfit = Math.round(mul(targetSellYen, feeRate)) - 750 - actualBuyYen;
+            const optimalShippingYen = estimateOptimalShippingCostYen(
+                itemData.appraisal.item_category || '',
+                itemData.appraisal.detected_model || '',
+                pseShippingType
+            );
+            const estProfit = Math.round(mul(targetSellYen, feeRate)) - optimalShippingYen - actualBuyYen;
+
             let validMakerJan = '';
             if (rawJanText.length >= 8) {
                 const p2 = rawJanText.substring(0, 2);
@@ -3609,12 +4291,14 @@
                     validMakerJan = rawJanText;
                 }
             }
+
             const now = new Date();
             const dateStr = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}`;
             const compactDate = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
             const seqSuffix = String(Math.floor(mul(Math.random(), 900) + 100));
             const ledgerId = `DIO-${compactDate}-${seqSuffix}`;
-            const imgFileName = `${ledgerId.toLowerCase().replace(/[^a-z0-9]/g, '_')}.jpg`;
+            const baseSafeName = ledgerId.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            const imgFileName = `${baseSafeName}_1.jpg`;
             const special8Note = check2025KobutsuSpecial8Items(
                 itemData.appraisal.item_category || '',
                 itemData.appraisal.detected_model || '',
@@ -3623,18 +4307,31 @@
             const finalCleanDesc = itemData.testerNote
                 ? `${itemData.cleanDesc}\n・実測検品メモ：${itemData.testerNote}`
                 : itemData.cleanDesc;
+
+            // メインに選ばれた画像を先頭にし、残りの連写画像もすべて保持してオークタウンZIPに同梱する
+            const orderedUrls = [itemData.cleanDataUrl];
+            if (Array.isArray(itemData.spinCleanUrls)) {
+                for (let k = 0; k < itemData.spinCleanUrls.length; k++) {
+                    if (k !== itemData.selectedPhotoIdx && itemData.spinCleanUrls[k]) {
+                        orderedUrls.push(itemData.spinCleanUrls[k]);
+                    }
+                }
+            }
+
             const ledgerRecord = {
                 ledger_id: ledgerId,
                 created_ms: Date.now(),
                 date_str: dateStr,
                 agent_id: partnerNameInput.value.trim() || 'Agent_01',
                 store_name: storeNameInput.value.trim() || 'リサイクル店舗',
+                store_address: (storeAddressInput && storeAddressInput.value.trim()) ? storeAddressInput.value.trim() : '長野県内（領収書記載所在地）',
                 category: itemData.appraisal.item_category || '機械工具類',
                 model: itemData.appraisal.detected_model || itemData.cleanTitle,
                 serial_or_feature: serialFeatureText,
                 quantity: 1,
                 store_price_yen: actualBuyYen,
                 recommended_sell_yen: targetSellYen,
+                shipping_cost_yen: optimalShippingYen,
                 net_profit_yen: estProfit,
                 invoice_verification: invoiceVerification,
                 special_8_note: special8Note,
@@ -3646,8 +4343,10 @@
                 clean_desc: finalCleanDesc,
                 personal_desc: itemData.personalDesc,
                 image_filename: imgFileName,
-                clean_image_data_url: itemData.cleanDataUrl
+                clean_image_data_url: itemData.cleanDataUrl,
+                spin_clean_urls: orderedUrls
             };
+
             await saveItemToLocalDB(ledgerRecord);
             const gasUrl = gasUrlInput.value.trim();
             if (gasUrl) {
@@ -3666,11 +4365,12 @@
                     enqueuePendingGasPayload({ action: 'CONFIRM_PURCHASE', ...ledgerRecord });
                 }
             }
-            submitBtn.innerText = `✅ ストック＆台帳保存完了 [${ledgerId}] (想定純利:+${estProfit.toLocaleString()}円)`;
+            submitBtn.innerText = `✅ ストック＆台帳保存完了 [${ledgerId}] (想定純利:+${estProfit.toLocaleString()}円 / 送料${optimalShippingYen}円計算)`;
             submitBtn.style.background = '#2e7d32';
             submitBtn.disabled = true;
             playAlertChime('TREASURE');
         }
+
         // ============================================================================
         // 15. 全17領域カテゴリID自動マッピング・免責テンプレート・CSV/ZIP直接生成
         // ============================================================================
@@ -3788,6 +4488,7 @@
             if (text.includes('PRO.C') || text.includes('N-001') || text.includes('ペグハンマー') || text.includes('コールマン') || text.includes('508') || text.includes('400')) return '2084046747';
             return '24666';
         }
+
         function resolveMercariCategoryId(item) {
             const text = `${item.category} ${item.model} ${item.clean_title}`.toUpperCase();
             if (text.includes('NARDI') || text.includes('MOMO') || text.includes('ステアリング')) return '1102';
@@ -3806,6 +4507,7 @@
             if (text.includes('プラレール') || text.includes('超合金') || text.includes('ポピー') || text.includes('620') || text.includes('ミニ四駆')) return '832';
             return '1226';
         }
+
         function getShippingSlipWaybillName(item) {
             if (item.pse_and_shipping_type === 'LITHIUM_BATTERY_LAND_ONLY') {
                 return '電動工具用バッテリー（リチウムイオン電池・端子絶縁済）';
@@ -3818,6 +4520,7 @@
             }
             return `${item.category || '電子機器・部品'}（リチウムイオン電池なし）`;
         }
+
         function buildCorporateFullDescription(baseDesc, pseShipType, platform, condCode) {
             const comm = kobutsuCommInput.value.trim() || '長野県公安委員会';
             const num = kobutsuNumInput.value.trim() || '申請準備中';
@@ -3857,6 +4560,7 @@
                 return sanitizeForAuctown(rawYahoo);
             }
         }
+
         function sanitizeForAuctown(str) {
             if (!str) return '';
             return String(str)
@@ -3866,6 +4570,7 @@
                 .replace(/'/g, '’')
                 .replace(/\r\n|\n|\r/g, '<br>');
         }
+
         function mapConditionToYahooString(code) {
             const map = {
                 1: '新品',
@@ -3877,6 +4582,7 @@
             };
             return map[Number(code)] || '目立った傷や汚れなし';
         }
+
         // ============================================================================
         // 16. Pure JS 無圧縮ZIPバイナリ構築エンジン（外部ライブラリ不要・100%単体動作）
         // ============================================================================
@@ -3891,6 +4597,7 @@
             }
             return table;
         })();
+
         function computeCrc32(u8Arr) {
             let crc = 0xFFFFFFFF;
             for (let i = 0; i < u8Arr.length; i++) {
@@ -3899,6 +4606,7 @@
             }
             return (crc ^ 0xFFFFFFFF) >>> 0;
         }
+
         function base64DataUrlToUint8Array(dataUrl) {
             if (!dataUrl || !dataUrl.includes(',')) return new Uint8Array(0);
             const b64 = dataUrl.split(',')[1];
@@ -3910,16 +4618,19 @@
             }
             return bytes;
         }
+
         function writeUint16LE(buf, offset, val) {
             buf[offset] = val & 0xFF;
             buf[offset + 1] = (val >>> 8) & 0xFF;
         }
+
         function writeUint32LE(buf, offset, val) {
             buf[offset] = val & 0xFF;
             buf[offset + 1] = (val >>> 8) & 0xFF;
             buf[offset + 2] = (val >>> 16) & 0xFF;
             buf[offset + 3] = (val >>> 24) & 0xFF;
         }
+
         function buildStandardZipBlob(filesArray) {
             const encoder = new TextEncoder();
             const localParts = [];
@@ -3962,7 +4673,7 @@
                 writeUint16LE(centralHeader, 32, 0);
                 writeUint16LE(centralHeader, 34, 0);
                 writeUint16LE(centralHeader, 36, 0);
-                writeUint32LE(centralHeader, 38, 0);
+                writeUint16LE(centralHeader, 38, 0);
                 writeUint32LE(centralHeader, 42, currentOffset);
                 centralHeader.set(nameBytes, 46);
                 centralParts.push(centralHeader);
@@ -3983,8 +4694,9 @@
             writeUint16LE(eocd, 20, 0);
             return new Blob([...localParts, ...centralParts, eocd], { type: 'application/zip' });
         }
+
         // ============================================================================
-        // 17. オークタウンZIP・メルカリShops CSV・古物台帳CSV・A4印刷の実行関数
+        // 17. オークタウンZIP（連写3枚全同梱対応）・メルカリShops CSV・古物台帳CSV
         // ============================================================================
         async function downloadAuctownZipPackage() {
             const items = await getAllItemsFromLocalDB();
@@ -3994,7 +4706,7 @@
             }
             const headers = [
                 'カテゴリ', 'タイトル', '説明', '開始価格', '即決価格', '個数',
-                '開催期間', '終了時間', 'JANコード', '画像1', '商品の状態',
+                '開催期間', '終了時間', 'JANコード', '画像1', '画像2', '画像3', '商品の状態',
                 '商品発送元の都道府県', '送料負担', '代金支払い', 'yahoo!簡単決済',
                 '発送までの日数', 'ネコ宅急便', '荷物の大きさ', '荷物の重量'
             ];
@@ -4007,7 +4719,21 @@
                 const safeDesc = buildCorporateFullDescription(it.clean_desc, it.pse_and_shipping_type, 'yahoo', it.condition_code);
                 const priceNum = parseInt(it.recommended_sell_yen, 10) || 3980;
                 const condStr = mapConditionToYahooString(it.condition_code);
-                const imgName = it.image_filename || `item_${i + 1}.jpg`;
+                const basePrefix = (it.ledger_id || `item_${i + 1}`).toLowerCase().replace(/[^a-z0-9]/g, '_');
+                const urlsList = (Array.isArray(it.spin_clean_urls) && it.spin_clean_urls.length > 0)
+                    ? it.spin_clean_urls
+                    : (it.clean_image_data_url ? [it.clean_image_data_url] : []);
+
+                const imgNames = ['', '', ''];
+                for (let p = 0; p < Math.min(3, urlsList.length); p++) {
+                    const fName = `${basePrefix}_${p + 1}.jpg`;
+                    const imgBytes = base64DataUrlToUint8Array(urlsList[p]);
+                    if (imgBytes.length > 0) {
+                        imgNames[p] = fName;
+                        zipFiles.push({ name: fName, data: imgBytes });
+                    }
+                }
+
                 rows.push([
                     catId,
                     safeTitle,
@@ -4018,7 +4744,9 @@
                     '7',
                     '22',
                     it.maker_jan || '',
-                    imgName,
+                    imgNames[0],
+                    imgNames[1],
+                    imgNames[2],
                     condStr,
                     '長野県',
                     '出品者',
@@ -4029,12 +4757,6 @@
                     '~80cm',
                     '~5kg'
                 ]);
-                if (it.clean_image_data_url) {
-                    const imgBytes = base64DataUrlToUint8Array(it.clean_image_data_url);
-                    if (imgBytes.length > 0) {
-                        zipFiles.push({ name: imgName, data: imgBytes });
-                    }
-                }
             }
             const csvContent = '\ufeff' + rows.map(r => r.join(',')).join('\r\n');
             const csvBytes = new TextEncoder().encode(csvContent);
@@ -4042,6 +4764,7 @@
             const zipBlob = buildStandardZipBlob(zipFiles);
             triggerBlobDownload(zipBlob, `auctown_upload_${Date.now()}.zip`);
         }
+
         async function downloadMercariShopsCsv() {
             const items = await getAllItemsFromLocalDB();
             if (!items.length) {
@@ -4092,6 +4815,7 @@
                 alert(`注意：中古バッテリー規制対象の商品 ${blockedCount} 件をメルカリShops用CSVから自動除外しました（ヤフオクZIP側には含まれています）。`);
             }
         }
+
         async function downloadKobutsuLedgerCsv() {
             const items = await getAllItemsFromLocalDB();
             if (!items.length) {
@@ -4118,7 +4842,7 @@
                     '1',
                     String(it.store_price_yen || 0),
                     it.invoice_verification || '店舗購入（レシート・領収書保管）',
-                    '長野県内（領収書記載所在地）',
+                    it.store_address || '長野県内（領収書記載所在地）',
                     it.store_name || 'リユース店舗',
                     '古物商（リユース店舗）',
                     'ー（法人）',
@@ -4132,6 +4856,7 @@
             const blob = new Blob([csvText], { type: 'text/csv;charset=utf-8' });
             triggerBlobDownload(blob, `kobutsu_ledger_style15_${Date.now()}.csv`);
         }
+
         function serializeRfc4180Csv(rows) {
             return rows.map(row =>
                 row.map(cell => {
@@ -4143,6 +4868,7 @@
                 }).join(',')
             ).join('\r\n');
         }
+
         function triggerBlobDownload(blob, filename) {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -4153,8 +4879,9 @@
             document.body.removeChild(a);
             setTimeout(() => URL.revokeObjectURL(url), 5000);
         }
+
         // ============================================================================
-        // 18. ストック一覧テーブル描画・端末間JSONバックアップ・A4横即時印刷
+        // 18. ストック一覧・JSONバックアップ・A4横印刷・🏷値札暗号チェッカー
         // ============================================================================
         async function openStockManagerModal() {
             unlockAudioEngine();
@@ -4162,9 +4889,61 @@
             stockManagerModal.style.display = 'flex';
             await renderStockLedgerTable();
         }
+
         function closeStockManagerModal() {
             stockManagerModal.style.display = 'none';
         }
+
+        function openPriceTagCheckerModal() {
+            unlockAudioEngine();
+            priceTagCheckerModal.style.display = 'flex';
+        }
+
+        function closePriceTagCheckerModal() {
+            priceTagCheckerModal.style.display = 'none';
+        }
+
+        // セカンドストリート値札下部「6桁数字（DDMMYY逆読み）」から入荷日と滞留日数を0.1秒で算出
+        function evaluateSecstPriceTagCode() {
+            const inputEl = document.getElementById('secstCodeInput');
+            const outEl = document.getElementById('secstDecodeResult');
+            if (!inputEl || !outEl) return;
+            const digits = (inputEl.value || '').replace(/[^0-9]/g, '');
+            if (digits.length !== 6) {
+                outEl.innerText = '値札下部の6桁の数字（例：150826）を入力してください。';
+                return;
+            }
+            // 右から2桁ずつ逆読み（例：6桁が DD MM YY または逆順配置）
+            const reversed = digits.split('').reverse().join('');
+            const yyA = parseInt(digits.substring(4, 6), 10);
+            const mmA = parseInt(digits.substring(2, 4), 10);
+            const ddA = parseInt(digits.substring(0, 2), 10);
+
+            const yyB = parseInt(reversed.substring(0, 2), 10);
+            const mmB = parseInt(reversed.substring(2, 4), 10);
+            const ddB = parseInt(reversed.substring(4, 6), 10);
+
+            let year = 2000 + yyB;
+            let month = mmB;
+            let day = ddB;
+            if (month < 1 || month > 12 || day < 1 || day > 31) {
+                year = 2000 + yyA;
+                month = mmA;
+                day = ddA;
+            }
+            if (month < 1 || month > 12 || day < 1 || day > 31) {
+                outEl.innerText = `入力コード [${digits}]：日付変換対象外の管理番号です。`;
+                return;
+            }
+            const tagDate = new Date(year, month - 1, day);
+            const diffMs = Date.now() - tagDate.getTime();
+            const stayDays = Math.max(0, Math.floor(div(diffMs, 86400000)));
+            const chanceMsg = stayDays >= 90
+                ? '🔥 3ヶ月以上長期滞留！大幅値下げ対象または価格改定漏れの可能性大！'
+                : (stayDays >= 30 ? '⚡ 1ヶ月以上経過（掘り出し物候補）' : '✨ 入荷から1ヶ月以内の新着商品');
+            outEl.innerHTML = `📅 解読入荷日：<strong>${year}年${month}月${day}日</strong>（店頭滞留：約 <strong>${stayDays}日</strong>）<br>${chanceMsg}`;
+        }
+
         async function renderStockLedgerTable() {
             const allItems = await getAllItemsFromLocalDB();
             const query = (document.getElementById('ledgerSearchInput').value || '').trim().toLowerCase();
@@ -4192,9 +4971,10 @@
             printBody.innerHTML = '';
             for (let i = 0; i < filtered.length; i++) {
                 const it = filtered[i];
+                const photoCount = (Array.isArray(it.spin_clean_urls) && it.spin_clean_urls.length > 0) ? it.spin_clean_urls.length : 1;
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${it.ledger_id || ''}</td>
+                    <td>${it.ledger_id || ''}<br><span style="color:#0277bd;">写真:${photoCount}枚</span></td>
                     <td>${it.date_str || ''}</td>
                     <td><strong>${it.model || ''}</strong><br><span style="color:#555;">${it.category || ''}</span></td>
                     <td>${it.serial_or_feature || ''}<br><span style="color:#00695c;">状態:${it.condition_code || 3} / JAN:${it.maker_jan || 'なし'}</span></td>
@@ -4216,7 +4996,7 @@
                     <td>1</td>
                     <td>${Number(it.store_price_yen || 0).toLocaleString()}円</td>
                     <td>${it.invoice_verification || ''}</td>
-                    <td>${it.store_name || ''}（領収書保管）</td>
+                    <td>${it.store_address || '長野県内'} ${it.store_name || ''}（領収書保管）</td>
                     <td>古物商 ／ ー</td>
                     <td>保管・出品中（${it.market_target || ''}）</td>
                     <td>${it.special_8_note || ''}</td>
@@ -4224,11 +5004,13 @@
                 printBody.appendChild(ptr);
             }
         }
+
         async function deleteStockRow(ledgerId) {
             if (!confirm(`管理番号 ${ledgerId} を一覧から削除しますか？`)) return;
             await deleteItemFromLocalDB(ledgerId);
             await renderStockLedgerTable();
         }
+
         async function printKobutsuLedgerA4() {
             await renderStockLedgerTable();
             const holder = kobutsuHolderInput.value.trim() || '株式会社DIO';
@@ -4238,6 +5020,7 @@
                 `事業者名：${holder} ／ 管轄：${comm}（${num}） ／ 出力日時：${new Date().toLocaleString()}`;
             window.print();
         }
+
         async function exportBackupJsonFile() {
             const items = await getAllItemsFromLocalDB();
             const backupObj = {
@@ -4248,6 +5031,7 @@
             const blob = new Blob([JSON.stringify(backupObj)], { type: 'application/json' });
             triggerBlobDownload(blob, `hunter_backup_${Date.now()}.json`);
         }
+
         function importBackupJsonFile(event) {
             const file = event.target.files && event.target.files[0];
             if (!file) return;
@@ -4273,6 +5057,7 @@
             };
             reader.readAsText(file);
         }
+
         // ============================================================================
         // 19. GAS双方向CORS通信（任意連携用：プリフライト回避 text/plain ＋ redirect: follow）
         // ============================================================================
@@ -4297,6 +5082,7 @@
             }
             return resJson;
         }
+
         function enqueuePendingGasPayload(payload) {
             try {
                 const raw = localStorage.getItem('hunter_pending_ledger') || '[]';
@@ -4306,6 +5092,7 @@
                 updatePendingQueueUI();
             } catch (e) {}
         }
+
         async function flushPendingGasQueue() {
             const gasUrl = gasUrlInput.value.trim();
             if (!gasUrl) {
@@ -4327,6 +5114,7 @@
                 cacheAuditText.innerText = '再送中に通信エラーが発生しました';
             }
         }
+
         function updatePendingQueueUI() {
             try {
                 const raw = localStorage.getItem('hunter_pending_ledger') || '[]';
@@ -4339,6 +5127,7 @@
                 }
             } catch (e) {}
         }
+
         function sendTelemetryAndSyncSynergyWithGAS(appraisal, annotatedDataUrl) {
             const gasUrl = gasUrlInput.value.trim();
             if (!gasUrl || appraisal.status === 'PASS') return;
@@ -4358,6 +5147,7 @@
             };
             postToGasBackendBidirectional(gasUrl, payload).catch(() => {});
         }
+
         function showTopNotification(text, status) {
             let prefix = '🎯 ';
             if (status === 'TREASURE') prefix = '🔥【お宝】';
@@ -4368,13 +5158,15 @@
                 notificationBanner.style.display = 'none';
             }, 6000);
         }
+
         // ============================================================================
-        // 20. 画面切替・自動巡回タイマー・設定保存・Gemini 4 Argon / 3.8 Flash 開通検証
+        // 20. 画面切替・自動巡回・くるくる設定保存・Gemini 4 Argon / 3.8 Flash 開通検証
         // ============================================================================
         function toggleCorporateSettingsVisibility() {
             const isCorp = operationModeSelect.value === 'corporate';
             corporateSettingsBlock.style.display = isCorp ? 'block' : 'none';
         }
+
         function switchToChatView() {
             unlockAudioEngine();
             videoCallView.classList.remove('active-view');
@@ -4384,16 +5176,19 @@
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }, 50);
         }
+
         function switchToVideoView() {
             unlockAudioEngine();
             chatRoomView.classList.remove('active-view');
             videoCallView.classList.add('active-view');
         }
+
         function openSettings() {
             updatePendingQueueUI();
             toggleCorporateSettingsVisibility();
             settingsModal.style.display = 'flex';
         }
+
         function toggleAutoScan() {
             unlockAudioEngine();
             if (isAutoScan) {
@@ -4402,6 +5197,7 @@
                 startAutoScan();
             }
         }
+
         function startAutoScan() {
             const key = apiKeyInput.value.trim();
             if (!key) {
@@ -4428,6 +5224,7 @@
                 }
             }, intervalMs);
         }
+
         function stopAutoScan() {
             isAutoScan = false;
             if (autoScanTimer) clearInterval(autoScanTimer);
@@ -4441,6 +5238,7 @@
                 pipStateLabel.innerText = '待機中(タップ拡大)';
             }
         }
+
         function cycleVoiceMode() {
             unlockAudioEngine();
             const current = voiceModeSelect.value;
@@ -4457,6 +5255,7 @@
                 playAlertChime('PASS');
             }
         }
+
         function updateVoiceUI() {
             const mode = voiceModeSelect.value;
             const icon = document.getElementById('voiceIcon');
@@ -4473,6 +5272,7 @@
                 if ('speechSynthesis' in window) window.speechSynthesis.cancel();
             }
         }
+
         async function fetchAvailableModels() {
             const key = apiKeyInput.value.trim();
             if (!key) {
@@ -4504,6 +5304,7 @@
                 modelFetchStatus.innerText = '通信エラーが発生しました';
             }
         }
+
         function loadSettings() {
             const savedOpMode = localStorage.getItem('hunter_op_mode') || 'personal';
             const savedKey = localStorage.getItem('hunter_api_key');
@@ -4516,13 +5317,17 @@
             const savedInterval = localStorage.getItem('hunter_interval');
             const savedVoice = localStorage.getItem('hunter_voice_v2') || 'treasure_only';
             const savedShortVoice = localStorage.getItem('hunter_short_voice');
+            const savedCornerFocus = localStorage.getItem('hunter_corner_focus') || 'AUTO';
+            const savedBudgetCap = localStorage.getItem('hunter_budget_cap_yen') || '0';
             const savedPartner = localStorage.getItem('hunter_partner');
             const savedStore = localStorage.getItem('hunter_store');
+            const savedStoreAddr = localStorage.getItem('hunter_store_addr');
             const savedComm = localStorage.getItem('hunter_kobutsu_comm');
             const savedNum = localStorage.getItem('hunter_kobutsu_num');
             const savedHolder = localStorage.getItem('hunter_kobutsu_holder');
             const savedGas = localStorage.getItem('hunter_gas_url');
             const savedSynergy = localStorage.getItem('hunter_synergy_mem');
+
             operationModeSelect.value = savedOpMode;
             if (savedKey) apiKeyInput.value = savedKey;
             if (savedPipe === 'argon_only' || savedPipe === 'flash_only' || savedPipe === 'hybrid_argon_flash') {
@@ -4538,8 +5343,12 @@
             if (savedInterval) intervalSelect.value = savedInterval;
             voiceModeSelect.value = savedVoice;
             isShortCallsignMode = savedShortVoice === '1';
+            syncCornerFocusMode(savedCornerFocus, true);
+            syncBudgetCapWheel(savedBudgetCap, true);
+
             if (savedPartner) partnerNameInput.value = savedPartner;
             if (savedStore) storeNameInput.value = savedStore;
+            if (savedStoreAddr && storeAddressInput) storeAddressInput.value = savedStoreAddr;
             if (savedComm) kobutsuCommInput.value = savedComm;
             if (savedNum) kobutsuNumInput.value = savedNum;
             if (savedHolder) kobutsuHolderInput.value = savedHolder;
@@ -4556,6 +5365,7 @@
                 settingsModal.style.display = 'flex';
             }
         }
+
         function saveSettings() {
             unlockAudioEngine();
             playAlertChime('PASS');
@@ -4570,8 +5380,13 @@
             localStorage.setItem('hunter_interval', intervalSelect.value);
             localStorage.setItem('hunter_voice_v2', voiceModeSelect.value);
             localStorage.setItem('hunter_short_voice', isShortCallsignMode ? '1' : '0');
+            localStorage.setItem('hunter_corner_focus', currentCornerFocusMode);
+            localStorage.setItem('hunter_budget_cap_yen', String(currentBudgetCapYen));
             localStorage.setItem('hunter_partner', partnerNameInput.value.trim() || '肇晃');
             localStorage.setItem('hunter_store', storeNameInput.value.trim() || 'ハードオフ・セカスト');
+            if (storeAddressInput) {
+                localStorage.setItem('hunter_store_addr', storeAddressInput.value.trim() || '長野県内（領収書記載所在地）');
+            }
             localStorage.setItem('hunter_kobutsu_comm', kobutsuCommInput.value.trim());
             localStorage.setItem('hunter_kobutsu_num', kobutsuNumInput.value.trim());
             localStorage.setItem('hunter_kobutsu_holder', kobutsuHolderInput.value.trim());
@@ -4580,29 +5395,34 @@
             applyExposureCompensationSetting();
             updateVoiceUI();
             updateShortVoiceButtonUI();
+            flashAutosaveBadge();
             settingsModal.style.display = 'none';
             if (isAutoScan) {
                 stopAutoScan();
                 startAutoScan();
             }
         }
+
         function applyPartnerName(name) {
             document.getElementById('vcPartnerName').innerText = name;
             document.getElementById('chatPartnerName').innerText = name;
             document.getElementById('firstMsgSender').innerText = name;
             notifSender.innerText = name;
         }
+
         setInterval(() => {
             callSeconds = callSeconds + 1;
             const mins = String(Math.floor(div(callSeconds, 60))).padStart(2, '0');
             const secs = String(callSeconds % 60).padStart(2, '0');
             document.getElementById('callTimer').innerText = `${mins}:${secs}`;
         }, 1000);
+
         async function requestWakeLock() {
             if ('wakeLock' in navigator) {
                 try { await navigator.wakeLock.request('screen'); } catch (e) {}
             }
         }
+
         window.addEventListener('load', async () => {
             await openHunterDB().catch(() => {});
             loadSettings();
